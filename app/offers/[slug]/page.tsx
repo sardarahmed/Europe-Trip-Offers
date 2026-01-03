@@ -1,31 +1,47 @@
 import { Container } from '@/components/Container';
 import { Button } from '@/components/ui/button';
 import { Star, Clock, MapPin, Check, ShieldCheck } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { notFound } from 'next/navigation';
+import { Activity } from '@/types';
 
-// Mock Data
-const ACTIVITY_DATA = {
-    title: 'Louvre Museum Skip-the-Line Hosted Tour',
-    city: 'Paris',
-    price: 65,
-    discountPrice: 55,
-    rating: 4.8,
-    reviewsCount: 1250,
-    description: 'Explore the world’s largest art museum with a guide and skip-the-line access. See the Mona Lisa, Venus de Milo, and other masterpieces without the wait.',
-    highlights: [
-        'Skip-the-line access to the Louvre Museum',
-        'Guided tour of masterpieces including Mona Lisa',
-        'Small group tour for a personalized experience',
-        'Audio headsets provided to hear the guide clearly'
-    ],
-    included: [
-        'Entrance ticket',
-        'Professional guide',
-        'Headsets'
-    ],
-    imageUrl: 'https://images.unsplash.com/photo-1565099824688-e93930dfa874?q=80&w=2070&auto=format&fit=crop',
-};
+export const revalidate = 60; // ISR
 
-export default function OfferPage({ params }: { params: { slug: string } }) {
+export default async function OfferPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+
+    const { data: activityData, error } = await supabase
+        .from('activities')
+        .select('*, cities(name)')
+        .eq('slug', slug)
+        .single();
+
+    if (error || !activityData) {
+        notFound();
+    }
+
+    // Map to Activity type (handling snake_case -> camelCase)
+    // Note: highlights is already an array in DB
+    const activity: Activity = {
+        id: activityData.id,
+        title: activityData.title,
+        slug: activityData.slug,
+        cityId: activityData.city_id,
+        cityName: activityData.cities?.name || 'Unknown',
+        price: activityData.price,
+        discountPrice: activityData.discount_price,
+        rating: activityData.rating,
+        reviewsCount: activityData.reviews_count,
+        imageUrl: activityData.image_url,
+        duration: activityData.duration,
+        isFeatured: activityData.is_featured,
+        categoryId: activityData.category_id,
+        highlights: activityData.highlights || [],
+        affiliateLink: activityData.affiliate_link,
+        description: activityData.description
+    };
+
+
     return (
         <div className="pb-20">
             <Container className="pt-8">
@@ -33,43 +49,47 @@ export default function OfferPage({ params }: { params: { slug: string } }) {
 
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-8">
-                        <h1 className="text-3xl md:text-4xl font-bold leading-tight">{ACTIVITY_DATA.title}</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold leading-tight">{activity.title}</h1>
 
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1 text-yellow-500 font-bold">
-                                <Star className="h-4 w-4 fill-current" /> {ACTIVITY_DATA.rating}
+                                <Star className="h-4 w-4 fill-current" /> {activity.rating}
                             </span>
-                            <span>({ACTIVITY_DATA.reviewsCount} reviews)</span>
+                            <span>({activity.reviewsCount} reviews)</span>
                             <span>•</span>
                             <span className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" /> {ACTIVITY_DATA.city}
+                                <MapPin className="h-4 w-4" /> {activity.cityName}
                             </span>
                             <span>•</span>
                             <span className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" /> 2.5 hours
+                                <Clock className="h-4 w-4" /> {activity.duration}
                             </span>
                         </div>
 
                         <div className="aspect-video w-full rounded-xl overflow-hidden bg-muted">
                             <div
                                 className="h-full w-full bg-cover bg-center"
-                                style={{ backgroundImage: `url(${ACTIVITY_DATA.imageUrl})` }}
+                                style={{ backgroundImage: `url('${activity.imageUrl}')` }}
                             />
                         </div>
 
                         <div className="prose dark:prose-invert max-w-none">
                             <h3 className="text-xl font-bold mb-3">Overview</h3>
-                            <p>{ACTIVITY_DATA.description}</p>
+                            <p>{activity.description}</p>
 
-                            <h3 className="text-xl font-bold mt-8 mb-4">Highlights</h3>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 list-none p-0">
-                                {ACTIVITY_DATA.highlights.map((item, i) => (
-                                    <li key={i} className="flex items-start gap-2">
-                                        <Check className="h-5 w-5 text-green-500 shrink-0" />
-                                        <span>{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                            {activity.highlights && activity.highlights.length > 0 && (
+                                <>
+                                    <h3 className="text-xl font-bold mt-8 mb-4">Highlights</h3>
+                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 list-none p-0">
+                                        {activity.highlights.map((item: string, i: number) => (
+                                            <li key={i} className="flex items-start gap-2">
+                                                <Check className="h-5 w-5 text-green-500 shrink-0" />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -79,11 +99,11 @@ export default function OfferPage({ params }: { params: { slug: string } }) {
                             <div className="flex items-end justify-between mb-6">
                                 <div>
                                     <p className="text-sm text-muted-foreground mb-1">From</p>
-                                    <p className="text-3xl font-bold text-primary">€{ACTIVITY_DATA.discountPrice}</p>
+                                    <p className="text-3xl font-bold text-primary">€{activity.discountPrice}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-muted-foreground line-through">€{ACTIVITY_DATA.price}</p>
-                                    <span className="text-xs font-bold text-green-600">Save €{ACTIVITY_DATA.price - ACTIVITY_DATA.discountPrice}</span>
+                                    <p className="text-xs text-muted-foreground line-through">€{activity.price}</p>
+                                    <span className="text-xs font-bold text-green-600">Save €{(activity.price - (activity.discountPrice || 0)).toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -98,8 +118,14 @@ export default function OfferPage({ params }: { params: { slug: string } }) {
                                 </div>
                             </div>
 
-                            <Button size="lg" className="w-full text-lg font-bold">
-                                Check Availability
+                            <Button size="lg" className="w-full text-lg font-bold" asChild>
+                                <a
+                                    href={activity.affiliateLink || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Check Availability
+                                </a>
                             </Button>
 
                             <p className="text-xs text-center text-muted-foreground mt-4">

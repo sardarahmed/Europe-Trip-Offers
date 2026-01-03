@@ -4,12 +4,15 @@ import { MapPin } from 'lucide-react';
 
 interface CityCardProps {
     city: City;
+    variant?: 'default' | 'compact';
 }
 
-export function CityCard({ city }: CityCardProps) {
+export function CityCard({ city, variant = 'default' }: CityCardProps) {
+    const aspectRatioClass = variant === 'compact' ? 'aspect-[3/2]' : 'aspect-[4/5]';
+
     return (
         <Link href={`/cities/${city.slug}`} className="group relative block overflow-hidden rounded-xl bg-gray-100 dark:bg-zinc-900 shadow-md transition-shadow hover:shadow-xl">
-            <div className="aspect-[4/5] w-full overflow-hidden">
+            <div className={`${aspectRatioClass} w-full overflow-hidden`}>
                 <div
                     className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                     style={{ backgroundImage: `url(${city.imageUrl})` }}

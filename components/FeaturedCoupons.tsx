@@ -4,51 +4,13 @@ import { Coupon } from '@/types';
 import { CouponCard } from './CouponCard';
 import { Container } from './Container';
 import { Button } from './ui/button';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
-export function FeaturedCoupons() {
-    const [coupons, setCoupons] = useState<Coupon[]>([]);
+interface FeaturedCouponsProps {
+    coupons: Coupon[];
+}
 
-    useEffect(() => {
-        async function fetchCoupons() {
-            try {
-                // Fetch only featured coupons, allow mapping to Type
-                const { data, error } = await supabase
-                    .from('coupons')
-                    .select('*')
-                    .eq('is_featured', true)
-                    .limit(4);
-
-                if (data && !error) {
-                    // Map DB keys to Frontend CamelCase if necessary? 
-                    // Supabase JS client usually returns matching column names via types generation or we map manually.
-                    // Our DB uses snake_case keys (discount_amount), our Types use camelCase (discountAmount).
-                    // WE MUST MAP THEM.
-
-                    const mappedCoupons: Coupon[] = data.map((c: any) => ({
-                        id: c.id,
-                        code: c.code,
-                        title: c.title,
-                        description: c.description || '',
-                        discountAmount: c.discount_amount,
-                        expiryDate: c.expiry_date,
-                        imageUrl: c.image_url,
-                        isFeatured: c.is_featured,
-                        categoryId: c.category_id,
-                        activityId: c.activity_id
-                    }));
-
-                    setCoupons(mappedCoupons);
-                }
-            } catch (err) {
-                console.error('Error fetching featured coupons:', err);
-            }
-        }
-        fetchCoupons();
-    }, []);
-
-    if (coupons.length === 0) return null; // Don't show if empty loading state needed really
+export function FeaturedCoupons({ coupons }: FeaturedCouponsProps) {
+    if (coupons.length === 0) return null;
 
     return (
         <section className="bg-muted/30 py-16">
@@ -69,7 +31,6 @@ export function FeaturedCoupons() {
                     {coupons.map((coupon) => (
                         <CouponCard key={coupon.id} coupon={coupon} />
                     ))}
-                    {/* If we have fewer than 4, maybe we don't pad anymore, or we assume DB has enough */}
                 </div>
             </Container>
         </section>

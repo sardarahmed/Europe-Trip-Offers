@@ -31,6 +31,9 @@ export interface Activity {
     imageUrl: string;
     duration: string;
     isFeatured: boolean;
+    highlights?: string[];
+    affiliateLink?: string;
+    description?: string;
 }
 
 export interface Coupon {

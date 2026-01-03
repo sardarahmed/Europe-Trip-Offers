@@ -15,7 +15,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
                 <Link href={`/offers/${activity.slug}`}>
                     <div
                         className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                        style={{ backgroundImage: `url(${activity.imageUrl})` }}
+                        style={{ backgroundImage: `url('${activity.imageUrl}')` }}
                     />
                 </Link>
 

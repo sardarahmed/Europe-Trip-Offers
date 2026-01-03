@@ -4,47 +4,12 @@ import { Activity } from '@/types';
 import { ActivityCard } from './ActivityCard';
 import { Container } from './Container';
 import { Button } from './ui/button';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
-export function FeaturedDeals() {
-    const [activities, setActivities] = useState<Activity[]>([]);
+interface FeaturedDealsProps {
+    activities: Activity[];
+}
 
-    useEffect(() => {
-        async function fetchActivities() {
-            try {
-                const { data, error } = await supabase
-                    .from('activities')
-                    .select('*, cities(name)') // Join with cities to get city name
-                    .eq('is_featured', true)
-                    .limit(4);
-
-                if (data && !error) {
-                    const mapped: Activity[] = data.map((a: any) => ({
-                        id: a.id,
-                        title: a.title,
-                        slug: a.slug,
-                        cityId: a.city_id,
-                        cityName: a.cities?.name || 'Unknown',
-                        price: a.price,
-                        discountPrice: a.discount_price,
-                        rating: a.rating,
-                        reviewsCount: a.reviews_count,
-                        imageUrl: a.image_url,
-                        duration: a.duration,
-                        isFeatured: a.is_featured,
-                        categoryId: a.category_id,
-                        highlights: a.highlights
-                    }));
-                    setActivities(mapped);
-                }
-            } catch (err) {
-                console.error('Error fetching featured deals:', err);
-            }
-        }
-        fetchActivities();
-    }, []);
-
+export function FeaturedDeals({ activities }: FeaturedDealsProps) {
     if (activities.length === 0) return null;
 
     return (
