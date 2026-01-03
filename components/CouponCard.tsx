@@ -23,7 +23,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
 
     return (
         <>
-            <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-hidden rounded-xl bg-white dark:bg-zinc-900 border shadow-sm hover:shadow-xl transition-all aspect-square flex flex-col">
+            <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-hidden rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all aspect-square flex flex-col">
                 {/* Image Section (Small - ~35-40% height) */}
                 <div className="h-[40%] w-full overflow-hidden relative bg-muted">
                     {coupon.imageUrl ? (
