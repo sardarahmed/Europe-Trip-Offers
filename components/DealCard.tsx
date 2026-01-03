@@ -7,13 +7,18 @@ interface DealCardProps {
     activity: Activity;
 }
 
+import Image from 'next/image';
+
 export function DealCard({ activity }: DealCardProps) {
     return (
         <div className="flex flex-col md:flex-row gap-4 border rounded-xl overflow-hidden bg-white text-slate-900 hover:shadow-md transition-shadow">
             <div className="w-full md:w-48 aspect-video md:aspect-square shrink-0 relative">
-                <div
-                    className="h-full w-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${activity.imageUrl})` }}
+                <Image
+                    src={activity.imageUrl}
+                    alt={activity.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 200px"
+                    className="object-cover"
                 />
             </div>
 

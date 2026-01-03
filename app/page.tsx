@@ -27,8 +27,8 @@ export default async function Home() {
 
   // Hero
   const heroData = heroResult.data || {
-    title: 'Discover the Best Europe Travel Deals',
-    subtitle: 'Explore top-rated tours, exclusive coupons, and hidden gems across Europe.',
+    title: 'Uncover Exclusive Europe Travel Deals & Coupons',
+    subtitle: 'Save up to 50% on top-rated tours, hotels, and attractions with our verified promo codes.',
     backgroundImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070'
   };
   const heroProps = {

@@ -5,13 +5,17 @@ import { Button } from './ui/button';
 import { useState } from 'react';
 import { cn } from '@/lib/utils'; // Implemented in previous step
 
+import { useRouter } from 'next/navigation';
+
 export function SearchBox({ className }: { className?: string }) {
     const [query, setQuery] = useState('');
+    const router = useRouter();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement search redirection
-        console.log('Searching for:', query);
+        if (query.trim()) {
+            router.push(`/offers?q=${encodeURIComponent(query)}`);
+        }
     };
 
     return (

@@ -3,6 +3,8 @@ import { Activity } from '@/types';
 import { Button } from './ui/button';
 import { MapPin, Star, Clock } from 'lucide-react';
 
+import Image from 'next/image';
+
 interface ActivityCardProps {
     activity: Activity;
 }
@@ -13,9 +15,12 @@ export function ActivityCard({ activity }: ActivityCardProps) {
             {/* Image Section */}
             <div className="relative aspect-[4/3] overflow-hidden">
                 <Link href={`/offers/${activity.slug}`}>
-                    <div
-                        className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                        style={{ backgroundImage: `url('${activity.imageUrl}')` }}
+                    <Image
+                        src={activity.imageUrl}
+                        alt={activity.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                 </Link>
 

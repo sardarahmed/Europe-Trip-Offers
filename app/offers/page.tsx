@@ -7,17 +7,24 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
+import { useSearchParams } from 'next/navigation';
+
 export default function OffersPage() {
     const [activities, setActivities] = useState<Activity[]>([]);
     const [loading, setLoading] = useState(true);
     const [sort, setSort] = useState('Recommended');
 
+    // Search params
+    const searchParams = useSearchParams();
+    const query = searchParams.get('q')?.toLowerCase() || '';
+
     useEffect(() => {
         async function fetchActivities() {
             try {
+                // Fetch all activities (filtering done client-side for simplicity)
                 const { data, error } = await supabase
                     .from('activities')
-                    .select('*, cities(name)');
+                    .select('*, cities(name, country)'); // Added country for better search
 
                 if (data && !error) {
                     const mapped: Activity[] = data.map((a: any) => ({
@@ -34,7 +41,8 @@ export default function OffersPage() {
                         duration: a.duration,
                         isFeatured: a.is_featured,
                         categoryId: a.category_id,
-                        highlights: a.highlights
+                        highlights: a.highlights,
+                        // Add hidden metadata for search if needed (e.g. description)
                     }));
                     setActivities(mapped);
                 }
@@ -47,8 +55,14 @@ export default function OffersPage() {
         fetchActivities();
     }, []);
 
-    // Sorting logic
-    const sortedActivities = [...activities].sort((a, b) => {
+    // Filter & Sort
+    const filteredActivities = activities.filter(a => {
+        if (!query) return true;
+        const searchStr = `${a.title} ${a.cityName}`.toLowerCase();
+        return searchStr.includes(query);
+    });
+
+    const sortedActivities = [...filteredActivities].sort((a, b) => {
         if (sort === 'Price: Low to High') {
             return (a.discountPrice || a.price) - (b.discountPrice || b.price);
         }

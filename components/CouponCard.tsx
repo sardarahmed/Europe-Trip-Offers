@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
+import Image from 'next/image';
+
 interface CouponCardProps {
     coupon: Coupon;
 }
@@ -27,9 +29,12 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 {/* Image Section (Small - ~35-40% height) */}
                 <div className="h-[40%] w-full overflow-hidden relative bg-muted">
                     {coupon.imageUrl ? (
-                        <div
-                            className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                            style={{ backgroundImage: `url(${coupon.imageUrl})` }}
+                        <Image
+                            src={coupon.imageUrl}
+                            alt={coupon.title}
+                            fill
+                            sizes="(max-width: 768px) 50vw, 20vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                     ) : (
                         <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary/40 font-bold">
