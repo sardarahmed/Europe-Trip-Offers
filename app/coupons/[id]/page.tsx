@@ -3,12 +3,13 @@
 import { Container } from '@/components/Container';
 import { Button } from '@/components/ui/button';
 import { Calendar, CheckCircle, Ticket, Copy, ExternalLink, ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Coupon } from '@/types';
 import Link from 'next/link';
 
-export default function CouponDetailsPage({ params }: { params: { id: string } }) {
+export default function CouponDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [coupon, setCoupon] = useState<Coupon | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -18,7 +19,7 @@ export default function CouponDetailsPage({ params }: { params: { id: string } }
                 const { data: c, error } = await supabase
                     .from('coupons')
                     .select('*')
-                    .eq('id', params.id)
+                    .eq('id', id)
                     .single();
 
                 if (c && !error) {
@@ -43,7 +44,7 @@ export default function CouponDetailsPage({ params }: { params: { id: string } }
             }
         }
         fetchCoupon();
-    }, [params.id]);
+    }, [id]);
 
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;

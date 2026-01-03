@@ -3,119 +3,100 @@
 import { Container } from '@/components/Container';
 import { CouponCard } from '@/components/CouponCard';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search, SlidersHorizontal } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Coupon } from '@/types';
-import { useState } from 'react';
-
-// Extended Mock Data
-const ALL_COUPONS: Coupon[] = [
-    {
-        id: '1',
-        code: 'PARIS10',
-        title: '10% OFF Paris Tours',
-        description: 'Save 10% on all museum tickets and city tours in Paris.',
-        discountAmount: '10% OFF',
-        expiryDate: '2025-12-31',
-        imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=300&auto=format&fit=crop',
-        isFeatured: true,
-    },
-    {
-        id: '2',
-        code: 'SUMMER25',
-        title: '€25 OFF Summer Bookings',
-        description: 'Get €25 off when you spend €150 or more on any activity.',
-        discountAmount: '€25 OFF',
-        expiryDate: '2025-08-31',
-        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=300&auto=format&fit=crop',
-        isFeatured: true,
-    },
-    {
-        id: '3',
-        code: 'ROME5',
-        title: '5% OFF Rome Attractions',
-        description: 'Valid for Colosseum, Vatican, and other top Rome sites.',
-        discountAmount: '5% OFF',
-        expiryDate: '2025-11-30',
-        imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=300&auto=format&fit=crop',
-        isFeatured: true,
-    },
-    {
-        id: '4',
-        code: 'LONDON20',
-        title: '20% OFF London Eye',
-        description: 'Exclusive deal for standard admission tickets.',
-        discountAmount: '20% OFF',
-        expiryDate: '2025-10-15',
-        imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=300&auto=format&fit=crop',
-        isFeatured: false,
-    },
-    {
-        id: '5',
-        code: 'AMSTERDAM',
-        title: 'Free Canal Cruise Upgrade',
-        description: 'Book a dinner cruise and get a free drink package upgrade.',
-        discountAmount: 'FREE UPGRADE',
-        expiryDate: '2025-09-01',
-        imageUrl: 'https://images.unsplash.com/photo-1512470876302-6a084e9c6422?q=80&w=300&auto=format&fit=crop',
-        isFeatured: false,
-    },
-    {
-        id: '6',
-        code: 'BARCELONA15',
-        title: '15% OFF Sagrada Familia',
-        description: 'Skip the line tickets at a discounted rate.',
-        discountAmount: '15% OFF',
-        expiryDate: '2025-12-31',
-        imageUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=300&auto=format&fit=crop',
-        isFeatured: false,
-    },
-];
+import { supabase } from '@/lib/supabase';
 
 export default function CouponsPage() {
-    const [filter, setFilter] = useState('All');
+    const [coupons, setCoupons] = useState<Coupon[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    const filters = ['All', 'Paris', 'Rome', 'London', 'Amsterdam', 'Barcelona'];
+    useEffect(() => {
+        async function fetchCoupons() {
+            try {
+                const { data, error } = await supabase
+                    .from('coupons')
+                    .select('*')
+                    .order('is_featured', { ascending: false });
 
-    const filteredCoupons = filter === 'All'
-        ? ALL_COUPONS
-        : ALL_COUPONS.filter(c => c.title.includes(filter) || c.description.includes(filter));
+                if (data && !error) {
+                    const mapped: Coupon[] = data.map((c: any) => ({
+                        id: c.id,
+                        code: c.code,
+                        title: c.title,
+                        description: c.description || '',
+                        discountAmount: c.discount_amount,
+                        expiryDate: c.expiry_date,
+                        imageUrl: c.image_url,
+                        isFeatured: c.is_featured,
+                        categoryId: c.category_id,
+                        activityId: c.activity_id
+                    }));
+                    setCoupons(mapped);
+                }
+            } catch (err) {
+                console.error('Error fetching coupons:', err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchCoupons();
+    }, []);
+
+    const filteredCoupons = coupons.filter(coupon =>
+        coupon.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        coupon.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
-        <div className="py-12 md:py-20">
+        <div className="min-h-screen py-20">
             <Container>
-                <div className="text-center max-w-2xl mx-auto mb-12">
+                {/* Header */}
+                <div className="mb-12 text-center max-w-2xl mx-auto">
                     <h1 className="text-4xl font-bold tracking-tight mb-4">Travel Coupons & Promo Codes</h1>
                     <p className="text-muted-foreground text-lg">
-                        Save on your next European adventure with our exclusive discount codes.
-                        Updated daily to ensure you get the best deals.
+                        Browse verified discount codes for top European attractions, tours, and hotels.
                     </p>
                 </div>
 
-                {/* Filters */}
-                <div className="flex flex-wrap justify-center gap-2 mb-12">
-                    {filters.map((f) => (
-                        <Button
-                            key={f}
-                            variant={filter === f ? 'default' : 'outline'}
-                            onClick={() => setFilter(f)}
-                            className="rounded-full"
-                        >
-                            {f}
-                        </Button>
-                    ))}
+                {/* Search & Filter */}
+                <div className="flex flex-col md:flex-row gap-4 mb-10 items-center justify-between bg-muted/50 p-4 rounded-xl">
+                    <div className="relative w-full md:w-96">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search coupons..."
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <Button variant="outline" className="gap-2">
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Filter
+                    </Button>
                 </div>
 
-                {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {/* Loading State */}
+                {loading && (
+                    <div className="text-center py-20">Loading coupons...</div>
+                )}
+
+                {/* Empty State */}
+                {!loading && filteredCoupons.length === 0 && (
+                    <div className="text-center py-20 text-muted-foreground">
+                        No coupons found matching your search.
+                    </div>
+                )}
+
+                {/* Coupons Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {filteredCoupons.map((coupon) => (
                         <CouponCard key={coupon.id} coupon={coupon} />
                     ))}
                 </div>
-
-                {filteredCoupons.length === 0 && (
-                    <div className="text-center py-20 text-muted-foreground">
-                        No coupons found for this category.
-                    </div>
-                )}
             </Container>
         </div>
     );
