@@ -9,7 +9,7 @@ interface ActivityCardProps {
 
 export function ActivityCard({ activity }: ActivityCardProps) {
     return (
-        <div className="group flex flex-col overflow-hidden rounded-xl bg-white border dark:bg-zinc-900 shadow-sm transition-all hover:shadow-lg dark:border-zinc-800">
+        <div className="group flex flex-col overflow-hidden rounded-xl bg-white text-slate-900 border shadow-sm transition-all hover:shadow-lg">
             {/* Image Section */}
             <div className="relative aspect-[4/3] overflow-hidden">
                 <Link href={`/offers/${activity.slug}`}>
