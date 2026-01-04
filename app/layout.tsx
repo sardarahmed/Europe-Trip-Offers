@@ -5,6 +5,7 @@ import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -29,7 +30,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <div className="flex min-h-screen flex-col">
-          <AnalyticsTracker />
+          <Suspense fallback={null}>
+            <AnalyticsTracker />
+          </Suspense>
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
