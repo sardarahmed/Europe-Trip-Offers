@@ -20,7 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.variable, outfit.variable, "min-h-screen bg-background font-sans antialiased")}>
+      <body
+        className={cn(inter.variable, outfit.variable, "min-h-screen bg-background font-sans antialiased")}
+        suppressHydrationWarning
+      >
         <div className="flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">{children}</main>
