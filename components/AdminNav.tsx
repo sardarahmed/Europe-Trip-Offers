@@ -13,6 +13,7 @@ export function AdminNav() {
         { href: '/admin/add-city', label: 'Add City' },
         { href: '/admin/add-coupon', label: 'Add Coupon' },
         { href: '/admin/add-blog', label: 'Add Blog' },
+        { href: '/admin/analytics', label: 'Analytics' },
     ];
 
     return (

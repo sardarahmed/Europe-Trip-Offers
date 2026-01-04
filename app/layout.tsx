@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <div className="flex min-h-screen flex-col">
+          <AnalyticsTracker />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
