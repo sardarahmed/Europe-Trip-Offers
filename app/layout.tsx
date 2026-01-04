@@ -12,6 +12,9 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 export const metadata: Metadata = {
   title: "Europe Trip Offers | Best Travel Deals & Coupons",
   description: "Discover exclusive deals on Europe tours, hotels, and attractions. Save up to 50% with verified coupons.",
+  verification: {
+    google: "NKEBxn6sdtDuwhxUOMdJyxJ4z6qcORqsxRqFDqzhoGI",
+  },
 };
 
 export default function RootLayout({
