@@ -40,10 +40,15 @@ export function ActivityCard({ activity }: ActivityCardProps) {
                         <MapPin className="h-3 w-3" />
                         {activity.cityName}
                     </div>
-                    <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {activity.duration}
-                    </div>
+                    {/* Store/Connect */}
+                    {activity.store && (
+                        <div className="flex items-center gap-1 text-slate-600 font-medium">
+                            {activity.store.logoUrl && (
+                                <img src={activity.store.logoUrl} alt={activity.store.name} className="h-4 w-4 object-contain rounded-full border bg-white" />
+                            )}
+                            <span className="truncate max-w-[80px]">{activity.store.name}</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Title */}

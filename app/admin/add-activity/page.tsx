@@ -16,6 +16,7 @@ export default function AddActivityPage() {
     const router = useRouter();
     const [cities, setCities] = useState<SimpleItem[]>([]);
     const [categories, setCategories] = useState<SimpleItem[]>([]);
+    const [stores, setStores] = useState<SimpleItem[]>([]); // New
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -24,6 +25,7 @@ export default function AddActivityPage() {
         title: '',
         city_id: '',
         category_id: '',
+        store_id: '', // New
         price: '',
         discount_price: '',
         image_url: '',
@@ -43,6 +45,11 @@ export default function AddActivityPage() {
                 // Fetch Categories (only 'activity' type)
                 const { data: categoriesData } = await supabase.from('categories').select('id, name').eq('type', 'activity').order('name');
                 if (categoriesData) setCategories(categoriesData);
+
+                // Fetch Stores
+                const { data: storesData } = await supabase.from('stores').select('id, name').order('name'); // New
+                if (storesData) setStores(storesData);
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -83,6 +90,7 @@ export default function AddActivityPage() {
                 slug: slug,
                 city_id: formData.city_id,
                 category_id: formData.category_id,
+                store_id: formData.store_id || null, // New
                 price: parseFloat(formData.price) || 0,
                 discount_price: parseFloat(formData.discount_price) || 0,
                 image_url: formData.image_url,
@@ -141,18 +149,32 @@ export default function AddActivityPage() {
                         </select>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Category *</label>
-                        <select
-                            name="category_id"
-                            value={formData.category_id}
-                            onChange={handleChange}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            required
-                        >
-                            <option value="">Select a Category</option>
-                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Category *</label>
+                            <select
+                                name="category_id"
+                                value={formData.category_id}
+                                onChange={handleChange}
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                required
+                            >
+                                <option value="">Select a Category</option>
+                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Store / Brand</label>
+                            <select
+                                name="store_id"
+                                value={formData.store_id}
+                                onChange={handleChange}
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <option value="">Select a Store (Optional)</option>
+                                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                            </select>
+                        </div>
                     </div>
                 </div>
 

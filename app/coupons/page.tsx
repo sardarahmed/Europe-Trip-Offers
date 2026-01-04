@@ -19,7 +19,7 @@ export default function CouponsPage() {
             try {
                 const { data, error } = await supabase
                     .from('coupons')
-                    .select('*')
+                    .select('*, stores(*)')
                     .order('is_featured', { ascending: false });
 
                 if (data && !error) {
@@ -33,7 +33,19 @@ export default function CouponsPage() {
                         imageUrl: c.image_url,
                         isFeatured: c.is_featured,
                         categoryId: c.category_id,
-                        activityId: c.activity_id
+                        activityId: c.activity_id,
+                        storeId: c.store_id,
+                        store: c.stores ? {
+                            id: c.stores.id,
+                            name: c.stores.name,
+                            slug: c.stores.slug,
+                            logoUrl: c.stores.logo_url,
+                            description: c.stores.description,
+                            websiteUrl: c.stores.website_url,
+                            isFeatured: c.stores.is_featured,
+                            rating: c.stores.rating,
+                            reviewCount: c.stores.review_count
+                        } : undefined
                     }));
                     setCoupons(mapped);
                 }

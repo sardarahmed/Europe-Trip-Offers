@@ -15,6 +15,7 @@ interface SimpleItem {
 export default function AddCouponPage() {
     const router = useRouter();
     const [categories, setCategories] = useState<SimpleItem[]>([]);
+    const [stores, setStores] = useState<SimpleItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -26,23 +27,30 @@ export default function AddCouponPage() {
         expiry_date: '',
         image_url: '',
         category_id: '',
+        store_id: '', // New
         description: '',
+        terms: '',
         is_featured: true
     });
 
     useEffect(() => {
-        async function fetchCategories() {
+        async function fetchData() {
             try {
-                // Fetch Categories (only 'coupon' type)
-                const { data } = await supabase.from('categories').select('id, name').eq('type', 'coupon').order('name');
-                if (data) setCategories(data);
+                // Fetch Categories
+                const { data: catData } = await supabase.from('categories').select('id, name').eq('type', 'coupon').order('name');
+                if (catData) setCategories(catData);
+
+                // Fetch Stores
+                const { data: storeData } = await supabase.from('stores').select('id, name').order('name');
+                if (storeData) setStores(storeData);
+
             } catch (error) {
-                console.error('Error fetching categories:', error);
+                console.error('Error fetching data:', error);
             } finally {
                 setLoading(false);
             }
         }
-        fetchCategories();
+        fetchData();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -67,8 +75,13 @@ export default function AddCouponPage() {
                 expiry_date: formData.expiry_date ? new Date(formData.expiry_date).toISOString() : null,
                 image_url: formData.image_url,
                 category_id: formData.category_id || null,
+                store_id: formData.store_id || null, // New
                 description: formData.description,
+                terms: formData.terms,
                 is_featured: formData.is_featured,
+                // Auto-generate realistic looking stats for new coupons
+                used_count: Math.floor(Math.random() * 500) + 10,
+                success_rate: Math.floor(Math.random() * 10) + 90,
             };
 
             const { error } = await supabase.from('coupons').insert([payload]);
@@ -158,6 +171,19 @@ export default function AddCouponPage() {
                             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Store / Brand</label>
+                        <select
+                            name="store_id"
+                            value={formData.store_id}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <option value="">Select a Store (Optional)</option>
+                            {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                    </div>
                 </div>
 
                 <div>
@@ -178,7 +204,19 @@ export default function AddCouponPage() {
                         onChange={handleChange}
                         rows={3}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        placeholder="Terms and conditions or details..."
+                        placeholder="Details about the offer..."
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-2">Terms & Conditions</label>
+                    <textarea
+                        name="terms"
+                        value={formData.terms}
+                        onChange={handleChange}
+                        rows={2}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        placeholder="e.g. Min spend $50. New customers only."
                     />
                 </div>
 

@@ -22,15 +22,18 @@ export function FeaturedCoupons({ coupons }: FeaturedCouponsProps) {
                             Unlock exclusive savings on your next adventure with our verified promo codes.
                         </p>
                     </div>
-                    <Button variant="outline" asChild>
-                        <a href="/coupons">View all coupons &rarr;</a>
-                    </Button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {coupons.map((coupon) => (
                         <CouponCard key={coupon.id} coupon={coupon} />
                     ))}
+                </div>
+
+                <div className="text-center">
+                    <Button variant="outline" size="lg" asChild>
+                        <a href="/coupons">View all coupons &rarr;</a>
+                    </Button>
                 </div>
             </Container>
         </section>

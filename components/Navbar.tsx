@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Menu, X, MapPin, Tag, Percent, BookOpen, Mail } from 'lucide-react';
+import { Menu, X, MapPin, Tag, Percent, BookOpen, Mail, ShoppingBag } from 'lucide-react';
 import { Container } from './Container';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 
 const navItems = [
     { name: 'Home', href: '/' },
+    { name: 'Stores', href: '/stores', icon: ShoppingBag },
     { name: 'Coupons', href: '/coupons', icon: Tag },
     { name: 'Deals', href: '/offers', icon: Percent },
     { name: 'Cities', href: '/cities', icon: MapPin },

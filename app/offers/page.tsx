@@ -24,7 +24,7 @@ export default function OffersPage() {
                 // Fetch all activities (filtering done client-side for simplicity)
                 const { data, error } = await supabase
                     .from('activities')
-                    .select('*, cities(name, country)'); // Added country for better search
+                    .select('*, cities(name, country), stores(*)'); // Added stores
 
                 if (data && !error) {
                     const mapped: Activity[] = data.map((a: any) => ({
@@ -42,6 +42,18 @@ export default function OffersPage() {
                         isFeatured: a.is_featured,
                         categoryId: a.category_id,
                         highlights: a.highlights,
+                        storeId: a.store_id,
+                        store: a.stores ? {
+                            id: a.stores.id,
+                            name: a.stores.name,
+                            slug: a.stores.slug,
+                            logoUrl: a.stores.logo_url,
+                            description: a.stores.description,
+                            websiteUrl: a.stores.website_url,
+                            isFeatured: a.stores.is_featured,
+                            rating: a.stores.rating,
+                            reviewCount: a.stores.review_count
+                        } : undefined
                         // Add hidden metadata for search if needed (e.g. description)
                     }));
                     setActivities(mapped);

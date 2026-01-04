@@ -22,15 +22,18 @@ export function FeaturedDeals({ activities }: FeaturedDealsProps) {
                             Unforgettable experiences curated just for you.
                         </p>
                     </div>
-                    <Button variant="outline" asChild>
-                        <a href="/offers">View all offers &rarr;</a>
-                    </Button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {activities.map((activity) => (
                         <ActivityCard key={activity.id} activity={activity} />
                     ))}
+                </div>
+
+                <div className="text-center">
+                    <Button variant="outline" size="lg" asChild>
+                        <a href="/offers">View all offers &rarr;</a>
+                    </Button>
                 </div>
             </Container>
         </section>

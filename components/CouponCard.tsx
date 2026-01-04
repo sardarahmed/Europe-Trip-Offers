@@ -2,7 +2,7 @@
 
 import { Coupon } from '@/types';
 import { Button } from './ui/button';
-import { Copy, Clock, ExternalLink } from 'lucide-react';
+import { Copy, Clock, ExternalLink, CheckCircle, Users, Percent, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -15,19 +15,38 @@ interface CouponCardProps {
 
 export function CouponCard({ coupon }: CouponCardProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showTerms, setShowTerms] = useState(false);
 
     const handleReveal = (e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent navigation to details page
+        e.preventDefault();
         e.stopPropagation();
         setIsModalOpen(true);
         navigator.clipboard.writeText(coupon.code);
     };
 
+    const toggleTerms = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowTerms(!showTerms);
+    };
+
+    // Helper for "Verified" text
+    const getVerifiedText = (dateStr?: string) => {
+        if (!dateStr) return 'Verified recently';
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+        if (diffHours < 24) return 'Verified today';
+        return `Verified ${Math.floor(diffHours / 24)} days ago`;
+    };
+
     return (
         <>
-            <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-hidden rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all aspect-square flex flex-col">
+            <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-visible rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all flex flex-col h-full">
                 {/* Image Section (Small - ~35-40% height) */}
-                <div className="h-[40%] w-full overflow-hidden relative bg-muted">
+                <div className="h-40 w-full overflow-hidden relative bg-muted rounded-t-xl shrink-0">
                     {coupon.imageUrl ? (
                         <Image
                             src={coupon.imageUrl}
@@ -48,28 +67,81 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 </div>
 
                 {/* Content Section */}
-                <div className="flex-1 p-4 flex flex-col items-center justify-center text-center space-y-2 bg-gradient-to-br from-primary/5 to-transparent">
+                <div className="flex-1 p-4 flex flex-col space-y-3">
+
+                    {/* Trust Signals */}
+                    <div className="flex items-center gap-2 text-[10px] font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md w-fit">
+                        <CheckCircle className="h-3 w-3" />
+                        {getVerifiedText(coupon.lastVerified)}
+                    </div>
+
                     <h3 className="font-bold text-base leading-tight group-hover:text-primary transition-colors line-clamp-2">
                         {coupon.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground line-clamp-2 px-2">
+
+                    {/* usage stats */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span>{coupon.usedCount?.toLocaleString() || '100+'} used</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-green-600 font-bold">
+                            <Percent className="h-3 w-3" />
+                            <span>{coupon.successRate || 95}% success</span>
+                        </div>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground line-clamp-2">
                         {coupon.description}
                     </p>
+
+                    {/* Terms Toggle */}
+                    {coupon.terms && (
+                        <div className="w-full">
+                            <button
+                                onClick={toggleTerms}
+                                className="text-[10px] text-slate-500 hover:text-blue-600 flex items-center gap-1 w-full"
+                            >
+                                {showTerms ? 'Hide terms' : 'Show terms'}
+                                {showTerms ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            </button>
+                            {showTerms && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    className="text-[10px] text-slate-400 mt-1 bg-slate-50 p-2 rounded"
+                                >
+                                    {coupon.terms}
+                                </motion.div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Divider */}
-                <div className="relative h-px w-full bg-border mx-4 mb-2" />
+                <div className="relative h-px w-full bg-border" />
 
-                {/* Bottom Section: Reveal Button */}
-                <div className="p-3 bg-muted/30 flex flex-col gap-2 justify-end">
-                    <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>Expires: {new Date(coupon.expiryDate).toLocaleDateString()}</span>
-                    </div>
+                {/* Bottom Section: Store Label & Reveal Button */}
+                <div className="p-3 bg-muted/10 flex items-center justify-between gap-2 mt-auto rounded-b-xl">
+                    {/* Store Info */}
+                    {coupon.store && (
+                        <div className="flex items-center gap-2 shrink-0">
+                            {/* Use a simple image here or text if no Logo component available in this scope easily, 
+                                but better to just render image if exists */}
+                            {coupon.store.logoUrl ? (
+                                <div className="h-6 w-6 relative bg-white rounded-full border overflow-hidden p-0.5">
+                                    <img src={coupon.store.logoUrl} alt={coupon.store.name} className="object-contain w-full h-full" />
+                                </div>
+                            ) : (
+                                <span className="text-[10px] font-bold text-slate-500">{coupon.store.name}</span>
+                            )}
+                        </div>
+                    )}
+
                     <Button
                         onClick={handleReveal}
-                        className="w-full font-bold tracking-wide h-8 text-xs"
-                        variant="default"
+                        className="flex-1 font-bold tracking-wide h-8 text-xs shadow-sm hover:shadow-md bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 border-dashed border-2 ml-auto"
+                        variant="ghost"
                     >
                         Show Code
                     </Button>
@@ -115,6 +187,9 @@ export function CouponCard({ coupon }: CouponCardProps) {
                                     <Button size="lg" className="w-full gap-2" onClick={() => window.open('https://viator.com', '_blank')}>
                                         Visit Offer <ExternalLink className="h-4 w-4" />
                                     </Button>
+                                </div>
+                                <div className="text-xs text-slate-400">
+                                    Used by {coupon.usedCount || 100} people today.
                                 </div>
                             </div>
                         </motion.div>

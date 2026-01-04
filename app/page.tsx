@@ -2,14 +2,15 @@ import { HeroSection } from "@/components/HeroSection";
 import { FeaturedCities } from "@/components/FeaturedCities";
 import { FeaturedCoupons } from "@/components/FeaturedCoupons";
 import { FeaturedDeals } from "@/components/FeaturedDeals";
+import { FeaturedBrands } from "@/components/FeaturedBrands";
 import { supabase } from "@/lib/supabase";
-import { City, Coupon, Activity } from "@/types";
+import { City, Coupon, Activity, Store } from "@/types";
 
 export const revalidate = 60; // Revalidate every 60 seconds (Incremental Static Regeneration)
 
 export default async function Home() {
   // Parallel Data Fetching
-  const [heroResult, citiesResult, couponsResult, activitiesResult] = await Promise.all([
+  const [heroResult, citiesResult, couponsResult, activitiesResult, storesResult] = await Promise.all([
     // 1. Hero Content
     supabase.from('hero_content').select('*').eq('page_slug', 'home').single(),
 
@@ -17,10 +18,13 @@ export default async function Home() {
     supabase.from('cities').select('*').eq('featured', true).limit(4),
 
     // 3. Featured Coupons
-    supabase.from('coupons').select('*').eq('is_featured', true).limit(4),
+    supabase.from('coupons').select('*, stores(*)').eq('is_featured', true).limit(12),
 
     // 4. Featured Activities (Deals)
-    supabase.from('activities').select('*, cities(name)').eq('is_featured', true).limit(4)
+    supabase.from('activities').select('*, cities(name), stores(*)').eq('is_featured', true).limit(12),
+
+    // 5. Featured Stores
+    supabase.from('stores').select('*').eq('is_featured', true).limit(6)
   ]);
 
   // -- Data Mapping (Server Side) --
@@ -48,6 +52,19 @@ export default async function Home() {
     featured: c.featured,
   }));
 
+  // Stores
+  const stores: Store[] = (storesResult.data || []).map((s: any) => ({
+    id: s.id,
+    name: s.name,
+    slug: s.slug,
+    logoUrl: s.logo_url,
+    description: s.description,
+    websiteUrl: s.website_url,
+    isFeatured: s.is_featured,
+    rating: s.rating,
+    reviewCount: s.review_count
+  }));
+
   // Coupons
   const coupons: Coupon[] = (couponsResult.data || []).map((c: any) => ({
     id: c.id,
@@ -59,7 +76,23 @@ export default async function Home() {
     imageUrl: c.image_url,
     isFeatured: c.is_featured,
     categoryId: c.category_id,
-    activityId: c.activity_id
+    activityId: c.activity_id,
+    usedCount: c.used_count,
+    successRate: c.success_rate,
+    lastVerified: c.last_verified,
+    terms: c.terms,
+    storeId: c.store_id,
+    store: c.stores ? {
+      id: c.stores.id,
+      name: c.stores.name,
+      slug: c.stores.slug,
+      logoUrl: c.stores.logo_url,
+      description: c.stores.description,
+      websiteUrl: c.stores.website_url,
+      isFeatured: c.stores.is_featured,
+      rating: c.stores.rating,
+      reviewCount: c.stores.review_count
+    } : undefined
   }));
 
   // Activities
@@ -77,7 +110,19 @@ export default async function Home() {
     duration: a.duration,
     isFeatured: a.is_featured,
     categoryId: a.category_id,
-    highlights: a.highlights
+    highlights: a.highlights,
+    storeId: a.store_id,
+    store: a.stores ? {
+      id: a.stores.id,
+      name: a.stores.name,
+      slug: a.stores.slug,
+      logoUrl: a.stores.logo_url,
+      description: a.stores.description,
+      websiteUrl: a.stores.website_url,
+      isFeatured: a.stores.is_featured,
+      rating: a.stores.rating,
+      reviewCount: a.stores.review_count
+    } : undefined
   }));
 
   return (
@@ -88,11 +133,13 @@ export default async function Home() {
         backgroundImage={heroProps.backgroundImage}
       />
 
-      <FeaturedCities cities={cities} />
+      <FeaturedBrands stores={stores} />
 
       <FeaturedCoupons coupons={coupons} />
 
       <FeaturedDeals activities={activities} />
+
+      <FeaturedCities cities={cities} />
     </div>
   );
 }

@@ -5,6 +5,18 @@ export interface Category {
     type: 'city' | 'activity' | 'coupon' | 'blog';
 }
 
+export interface Store {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string; // db column: logo_url
+    description?: string;
+    websiteUrl?: string; // db column: website_url
+    isFeatured: boolean; // db column: is_featured
+    rating: number;
+    reviewCount: number; // db column: review_count
+}
+
 export interface City {
     id: string;
     name: string;
@@ -14,7 +26,7 @@ export interface City {
     imageUrl: string;
     activityCount: number;
     featured: boolean;
-    categoryId?: string; // Foreign key to Category
+    categoryId?: string;
 }
 
 export interface Activity {
@@ -23,7 +35,9 @@ export interface Activity {
     slug: string;
     cityId: string;
     cityName: string;
-    categoryId?: string; // Foreign key to Category
+    storeId?: string; // New
+    store?: Store;    // New
+    categoryId?: string;
     price: number;
     discountPrice?: number;
     rating: number;
@@ -41,12 +55,18 @@ export interface Coupon {
     code: string;
     title: string;
     description: string;
-    discountAmount: string; // e.g. "10% OFF"
+    discountAmount: string;
     expiryDate: string;
     activityId?: string;
-    categoryId?: string; // Foreign key to Category
+    storeId?: string; // New
+    store?: Store;    // New
+    categoryId?: string;
     imageUrl?: string;
     isFeatured: boolean;
+    usedCount?: number;      // New
+    successRate?: number;    // New
+    lastVerified?: string;   // New
+    terms?: string;          // New
 }
 
 export interface BlogPost {
@@ -57,5 +77,5 @@ export interface BlogPost {
     imageUrl: string;
     publishedAt: string;
     author: string;
-    categoryId?: string; // Foreign key to Category
+    categoryId?: string;
 }
