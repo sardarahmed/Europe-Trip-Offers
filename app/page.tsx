@@ -3,6 +3,7 @@ import { FeaturedCities } from "@/components/FeaturedCities";
 import { FeaturedCoupons } from "@/components/FeaturedCoupons";
 import { FeaturedDeals } from "@/components/FeaturedDeals";
 import { FeaturedBrands } from "@/components/FeaturedBrands";
+import { ReviewsSection } from "@/components/ReviewsSection";
 import { supabase } from "@/lib/supabase";
 import { City, Coupon, Activity, Store } from "@/types";
 
@@ -137,9 +138,12 @@ export default async function Home() {
 
       <FeaturedCoupons coupons={coupons} />
 
+
       <FeaturedDeals activities={activities} />
 
       <FeaturedCities cities={cities} />
+
+      <ReviewsSection />
     </div>
   );
 }
