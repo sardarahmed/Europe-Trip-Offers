@@ -1,12 +1,8 @@
 import Script from 'next/script';
 
 export function GoogleAnalytics() {
-    const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-
-    // Don't load GA if no measurement ID is configured
-    if (!measurementId) {
-        return null;
-    }
+    // Hardcoded Measurement ID - this is safe as GA IDs are meant to be public
+    const measurementId = 'G-GELW3ZJXES';
 
     return (
         <>
