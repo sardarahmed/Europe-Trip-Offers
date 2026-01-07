@@ -43,6 +43,11 @@ export default function AddStore() {
         try {
             const payload = {
                 ...formData,
+                name: formData.name.trim(),
+                slug: formData.slug.trim(),
+                description: formData.description.trim(),
+                logo_url: formData.logo_url.trim(),
+                website_url: formData.website_url.trim(),
                 rating: parseFloat(formData.rating)
             };
 
