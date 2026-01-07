@@ -1,5 +1,25 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Setup
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-GELW3ZJXES
+```
+
+### Google Analytics Configuration
+
+This project includes Google Analytics 4 (GA4) tracking. The Measurement ID is already configured as `G-GELW3ZJXES`.
+
+To verify GA is working:
+1. Deploy your site or run in production mode
+2. Visit your website
+3. Check Google Analytics Real-Time reports to see active users
+4. Navigate between pages to verify page view tracking
+
 ## Getting Started
 
 First, run the development server:

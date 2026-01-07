@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={cn(inter.variable, outfit.variable, "min-h-screen bg-background font-sans antialiased")}
         suppressHydrationWarning
       >
+        <GoogleAnalytics />
         <div className="flex min-h-screen flex-col">
           <Suspense fallback={null}>
             <AnalyticsTracker />
