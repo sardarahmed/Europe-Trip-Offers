@@ -110,7 +110,7 @@ export default async function OfferPage({ params }: { params: Promise<{ slug: st
 
                             {/* Formatted Description */}
                             <div className="text-base">
-                                {formatDescription(activity.description)}
+                                {formatDescription(activity.description || '')}
                             </div>
 
                             {activity.highlights && activity.highlights.length > 0 && (
