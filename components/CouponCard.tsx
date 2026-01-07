@@ -138,13 +138,24 @@ export function CouponCard({ coupon }: CouponCardProps) {
                         </div>
                     )}
 
-                    <Button
-                        onClick={handleReveal}
-                        className="flex-1 font-bold tracking-wide h-8 text-xs shadow-sm hover:shadow-md bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 border-dashed border-2 ml-auto"
-                        variant="ghost"
-                    >
-                        Show Code
-                    </Button>
+                    {/* Button */}
+                    <div className="flex-1">
+                        <Button
+                            onClick={(e) => {
+                                // 1. Open Affiliate Link in New Tab
+                                const targetUrl = coupon.store?.websiteUrl || '#';
+                                if (targetUrl !== '#') {
+                                    window.open(targetUrl, '_blank');
+                                }
+
+                                // 2. Reveal Code (open modal)
+                                handleReveal(e);
+                            }}
+                            className="w-full font-bold text-base h-11 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                        >
+                            Show Code
+                        </Button>
+                    </div>
                 </div>
             </Link>
 
