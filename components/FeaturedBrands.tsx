@@ -23,17 +23,20 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                    {stores.map((store) => (
+                    {stores.map((store, index) => (
                         <Link
                             key={store.id}
                             href={`/stores/${store.slug}`}
-                            className="group flex flex-col items-center justify-center p-6 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all"
+                            className="group flex flex-col items-center justify-between p-6 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-1 overflow-hidden relative"
                         >
-                            <div className="w-20 h-20 relative flex items-center justify-center mb-3 grayscale group-hover:grayscale-0 transition-all opacity-70 group-hover:opacity-100">
+                            {/* Decorative background accent on hover */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-50/0 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                            <div className="w-full h-24 relative flex items-center justify-center mb-4 z-10 p-2">
                                 <img
                                     src={store.logoUrl}
                                     alt={store.name}
-                                    className="object-contain max-w-full max-h-full"
+                                    className="object-contain max-w-full max-h-full drop-shadow-sm group-hover:drop-shadow-md transition-all duration-300 transform group-hover:scale-110"
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).style.display = 'none';
                                         (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -41,9 +44,15 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                                 />
                                 <span className="hidden text-xs font-bold text-slate-300 absolute">LOGO</span>
                             </div>
-                            <span className="text-sm font-medium text-slate-600 group-hover:text-blue-600 transition-colors">
-                                {store.name}
-                            </span>
+
+                            <div className="z-10 flex flex-col items-center gap-2 w-full">
+                                <span className="text-sm font-bold text-slate-700 group-hover:text-blue-700 transition-colors text-center line-clamp-1 w-full">
+                                    {store.name}
+                                </span>
+                                <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                                    View Offers
+                                </span>
+                            </div>
                         </Link>
                     ))}
                 </div>

@@ -2,7 +2,7 @@
 
 import { Coupon } from '@/types';
 import { Button } from './ui/button';
-import { Copy, Clock, ExternalLink, CheckCircle, Users, Percent, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, ExternalLink, CheckCircle, Users, Percent, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -16,18 +16,19 @@ interface CouponCardProps {
 export function CouponCard({ coupon }: CouponCardProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showTerms, setShowTerms] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
 
     const handleReveal = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         setIsModalOpen(true);
-        navigator.clipboard.writeText(coupon.code);
-    };
-
-    const toggleTerms = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setShowTerms(!showTerms);
+        handleCopy(coupon.code);
     };
 
     // Helper for "Verified" text
@@ -75,7 +76,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                         {getVerifiedText(coupon.lastVerified)}
                     </div>
 
-                    <h3 className="font-bold text-base leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="font-bold text-xl leading-tight group-hover:text-primary transition-colors">
                         {coupon.title}
                     </h3>
 
@@ -91,31 +92,38 @@ export function CouponCard({ coupon }: CouponCardProps) {
                         </div>
                     </div>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                        {coupon.description}
-                    </p>
+                    {/* Description Toggle */}
+                    <div className="w-full">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShowTerms(!showTerms);
+                            }}
+                            className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 w-full"
+                        >
+                            {showTerms ? 'Hide details' : 'Show details'}
+                            {showTerms ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                        </button>
 
-                    {/* Terms Toggle */}
-                    {coupon.terms && (
-                        <div className="w-full">
-                            <button
-                                onClick={toggleTerms}
-                                className="text-[10px] text-slate-500 hover:text-blue-600 flex items-center gap-1 w-full"
+                        {showTerms && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                className="mt-2 space-y-2 overflow-hidden"
                             >
-                                {showTerms ? 'Hide terms' : 'Show terms'}
-                                {showTerms ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                            </button>
-                            {showTerms && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    className="text-[10px] text-slate-400 mt-1 bg-slate-50 p-2 rounded"
-                                >
-                                    {coupon.terms}
-                                </motion.div>
-                            )}
-                        </div>
-                    )}
+                                <p className="text-sm text-muted-foreground">
+                                    {coupon.description}
+                                </p>
+                                {coupon.terms && (
+                                    <div className="text-xs text-slate-400 bg-slate-50 p-2 rounded">
+                                        <p className="font-semibold mb-1">Terms & Conditions:</p>
+                                        {coupon.terms}
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Divider */}
@@ -178,20 +186,24 @@ export function CouponCard({ coupon }: CouponCardProps) {
 
                             <div className="text-center space-y-4 pt-2">
                                 <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                                    <Copy className="h-8 w-8" />
+                                    {isCopied ? <CheckCircle className="h-8 w-8" /> : <Copy className="h-8 w-8" />}
                                 </div>
 
-                                <h3 className="text-2xl font-bold">Here is your code!</h3>
+                                <h3 className="text-2xl font-bold">
+                                    {isCopied ? 'Copied!' : 'Here is your code!'}
+                                </h3>
                                 <p className="text-muted-foreground text-sm">
-                                    Copy the code below and use it at checkout.
+                                    {isCopied ? 'Code copied to clipboard.' : 'Copy the code below and use it at checkout.'}
                                 </p>
 
                                 <div
-                                    className="bg-muted border border-dashed border-primary p-4 rounded-lg text-2xl font-mono font-bold text-center tracking-widest text-primary break-all cursor-pointer relative"
-                                    onClick={() => navigator.clipboard.writeText(coupon.code)}
+                                    className={`bg-muted border border-dashed ${isCopied ? 'border-green-500 bg-green-50' : 'border-primary'} p-4 rounded-lg text-2xl font-mono font-bold text-center tracking-widest text-primary break-all cursor-pointer relative transition-colors`}
+                                    onClick={() => handleCopy(coupon.code)}
                                 >
                                     {coupon.code}
-                                    <div className="text-[10px] uppercase text-muted-foreground mt-1 font-normal select-none">Click to copy</div>
+                                    <div className="text-[10px] uppercase text-muted-foreground mt-1 font-normal select-none">
+                                        {isCopied ? 'Copied!' : 'Click to copy'}
+                                    </div>
                                 </div>
 
                                 <div className="pt-2">
