@@ -6,6 +6,7 @@ import { Activity } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { calculateDistance } from '@/lib/utils';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -18,13 +19,32 @@ export default function OffersPage() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q')?.toLowerCase() || '';
 
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+    // Get User Location
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.log('Error getting location:', error);
+                }
+            );
+        }
+    }, []);
+
     useEffect(() => {
         async function fetchActivities() {
             try {
                 // Fetch all activities (filtering done client-side for simplicity)
                 const { data, error } = await supabase
                     .from('activities')
-                    .select('*, cities(name, country), stores(*)'); // Added stores
+                    .select('*, created_at, cities(name, country, latitude, longitude), stores(*)'); // Added stores and city coords
 
                 if (data && !error) {
                     const mapped: Activity[] = data.map((a: any) => ({
@@ -33,6 +53,8 @@ export default function OffersPage() {
                         slug: a.slug,
                         cityId: a.city_id,
                         cityName: a.cities?.name || 'Unknown',
+                        latitude: a.cities?.latitude,
+                        longitude: a.cities?.longitude,
                         price: a.price,
                         discountPrice: a.discount_price,
                         rating: a.rating,
@@ -42,6 +64,7 @@ export default function OffersPage() {
                         isFeatured: a.is_featured,
                         categoryId: a.category_id,
                         highlights: a.highlights,
+                        createdAt: a.created_at,
                         storeId: a.store_id,
                         store: a.stores ? {
                             id: a.stores.id,
@@ -84,6 +107,17 @@ export default function OffersPage() {
         if (sort === 'Top Rated') {
             return b.rating - a.rating;
         }
+        if (sort === 'Most Popular') {
+            return b.reviewsCount - a.reviewsCount;
+        }
+        if (sort === 'Newest') {
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        }
+        if (sort === 'Nearest Me' && userLocation && a.latitude && a.longitude && b.latitude && b.longitude) {
+            const distA = calculateDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude);
+            const distB = calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude);
+            return distA - distB;
+        }
         return 0; // Default
     });
 
@@ -106,9 +140,12 @@ export default function OffersPage() {
                             onChange={(e) => setSort(e.target.value)}
                         >
                             <option>Recommended</option>
+                            <option>Most Popular</option>
+                            <option>Newest</option>
                             <option>Price: Low to High</option>
                             <option>Price: High to Low</option>
                             <option>Top Rated</option>
+                            {userLocation && <option>Nearest Me</option>}
                         </select>
                     </div>
                 </div>

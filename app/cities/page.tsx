@@ -15,7 +15,7 @@ export default function CitiesPage() {
             try {
                 const { data, error } = await supabase
                     .from('cities')
-                    .select('*')
+                    .select('*, activities(count)')
                     .order('name');
 
                 if (data && !error) {
@@ -25,7 +25,7 @@ export default function CitiesPage() {
                         slug: c.slug,
                         country: c.country,
                         imageUrl: c.image_url,
-                        activityCount: c.activity_count,
+                        activityCount: c.activities?.[0]?.count || 0,
                         featured: c.featured,
                     }));
                     setCities(mapped);

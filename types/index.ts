@@ -27,6 +27,8 @@ export interface City {
     activityCount: number;
     featured: boolean;
     categoryId?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export interface Activity {
@@ -48,6 +50,9 @@ export interface Activity {
     highlights?: string[];
     affiliateLink?: string;
     description?: string;
+    createdAt?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export interface Coupon {
@@ -57,6 +62,7 @@ export interface Coupon {
     description: string;
     discountAmount: string;
     expiryDate: string;
+    createdAt?: string;
     activityId?: string;
     storeId?: string; // New
     store?: Store;    // New

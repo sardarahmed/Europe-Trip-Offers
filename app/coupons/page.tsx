@@ -13,13 +13,14 @@ export default function CouponsPage() {
     const [coupons, setCoupons] = useState<Coupon[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
+    const [sort, setSort] = useState('Recommended');
 
     useEffect(() => {
         async function fetchCoupons() {
             try {
                 const { data, error } = await supabase
                     .from('coupons')
-                    .select('*, stores(*)')
+                    .select('*, created_at, stores(*)')
                     .order('is_featured', { ascending: false });
 
                 if (data && !error) {
@@ -30,10 +31,13 @@ export default function CouponsPage() {
                         description: c.description || '',
                         discountAmount: c.discount_amount,
                         expiryDate: c.expiry_date,
+                        createdAt: c.created_at,
                         imageUrl: c.image_url,
                         isFeatured: c.is_featured,
                         categoryId: c.category_id,
                         activityId: c.activity_id,
+                        usedCount: c.used_count,
+                        successRate: c.success_rate,
                         storeId: c.store_id,
                         store: c.stores ? {
                             id: c.stores.id,
@@ -63,6 +67,19 @@ export default function CouponsPage() {
         coupon.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const sortedCoupons = [...filteredCoupons].sort((a, b) => {
+        if (sort === 'Most Popular') {
+            return (b.usedCount || 0) - (a.usedCount || 0);
+        }
+        if (sort === 'Newest') {
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        }
+        if (sort === 'Success Rate') {
+            return (b.successRate || 0) - (a.successRate || 0);
+        }
+        return 0; // Default
+    });
+
     return (
         <div className="min-h-screen py-20">
             <Container>
@@ -85,10 +102,20 @@ export default function CouponsPage() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <Button variant="outline" className="gap-2">
-                        <SlidersHorizontal className="h-4 w-4" />
-                        Filter
-                    </Button>
+
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+                        <select
+                            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            value={sort}
+                            onChange={(e) => setSort(e.target.value)}
+                        >
+                            <option>Recommended</option>
+                            <option>Most Popular</option>
+                            <option>Newest</option>
+                            <option>Success Rate</option>
+                        </select>
+                    </div>
                 </div>
 
                 {/* Loading State */}
@@ -97,7 +124,7 @@ export default function CouponsPage() {
                 )}
 
                 {/* Empty State */}
-                {!loading && filteredCoupons.length === 0 && (
+                {!loading && sortedCoupons.length === 0 && (
                     <div className="text-center py-20 text-muted-foreground">
                         No coupons found matching your search.
                     </div>
@@ -105,7 +132,7 @@ export default function CouponsPage() {
 
                 {/* Coupons Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {filteredCoupons.map((coupon) => (
+                    {sortedCoupons.map((coupon) => (
                         <CouponCard key={coupon.id} coupon={coupon} />
                     ))}
                 </div>

@@ -3,12 +3,33 @@
 import { City } from '@/types';
 import { CityCard } from './CityCard';
 import { Container } from './Container';
+import { useState, useEffect } from 'react';
 
 interface FeaturedCitiesProps {
     cities: City[];
 }
 
-export function FeaturedCities({ cities }: FeaturedCitiesProps) {
+export function FeaturedCities({ cities: initialCities }: FeaturedCitiesProps) {
+    const [cities, setCities] = useState<City[]>(initialCities);
+
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+
+                const sorted = [...initialCities].sort((a, b) => {
+                    if (a.latitude && a.longitude && b.latitude && b.longitude) {
+                        const distA = Math.pow(a.latitude - latitude, 2) + Math.pow(a.longitude - longitude, 2);
+                        const distB = Math.pow(b.latitude - latitude, 2) + Math.pow(b.longitude - longitude, 2);
+                        return distA - distB;
+                    }
+                    return 0;
+                });
+                setCities(sorted);
+            });
+        }
+    }, [initialCities]);
+
     if (cities.length === 0) return null;
 
     return (

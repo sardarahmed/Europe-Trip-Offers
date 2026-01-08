@@ -206,8 +206,16 @@ export function CouponCard({ coupon }: CouponCardProps) {
                                     </div>
                                 </div>
 
+
                                 <div className="pt-2">
-                                    <Button size="lg" className="w-full gap-2" onClick={() => window.open('https://viator.com', '_blank')}>
+                                    <Button
+                                        size="lg"
+                                        className="w-full gap-2"
+                                        onClick={() => {
+                                            const targetUrl = coupon.store?.websiteUrl || '#';
+                                            if (targetUrl !== '#') window.open(targetUrl, '_blank');
+                                        }}
+                                    >
                                         Visit Offer <ExternalLink className="h-4 w-4" />
                                     </Button>
                                 </div>

@@ -4,12 +4,38 @@ import { Activity } from '@/types';
 import { ActivityCard } from './ActivityCard';
 import { Container } from './Container';
 import { Button } from './ui/button';
+import { useState, useEffect } from 'react';
 
 interface FeaturedDealsProps {
     activities: Activity[];
 }
 
-export function FeaturedDeals({ activities }: FeaturedDealsProps) {
+export function FeaturedDeals({ activities: initialActivities }: FeaturedDealsProps) {
+    const [activities, setActivities] = useState<Activity[]>(initialActivities);
+
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                // Simple sort: if we have user location, prioritize nearest
+                // (Note: To use calculateDistance, we need to import it or define it. 
+                // Since this is a small component, I'll assume we can just do a quick sort or better yet, keep it simple:
+                // prioritizing based on simple proximity if activity has lat/long)
+
+                const sorted = [...initialActivities].sort((a, b) => {
+                    // Try to sort by distance if both have coordinates
+                    if (a.latitude && a.longitude && b.latitude && b.longitude) {
+                        const distA = Math.pow(a.latitude - latitude, 2) + Math.pow(a.longitude - longitude, 2);
+                        const distB = Math.pow(b.latitude - latitude, 2) + Math.pow(b.longitude - longitude, 2);
+                        return distA - distB;
+                    }
+                    return 0;
+                });
+                setActivities(sorted);
+            });
+        }
+    }, [initialActivities]);
+
     if (activities.length === 0) return null;
 
     return (

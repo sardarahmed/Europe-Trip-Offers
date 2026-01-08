@@ -16,7 +16,7 @@ export default async function Home() {
     supabase.from('hero_content').select('*').eq('page_slug', 'home').single(),
 
     // 2. Featured Cities
-    supabase.from('cities').select('*').eq('featured', true).limit(4),
+    supabase.from('cities').select('*, activities(count)').eq('featured', true).limit(4),
 
     // 3. Featured Coupons
     supabase.from('coupons').select('*, stores(*)').eq('is_featured', true).limit(12),
@@ -49,7 +49,7 @@ export default async function Home() {
     slug: c.slug,
     country: c.country,
     imageUrl: c.image_url,
-    activityCount: c.activity_count,
+    activityCount: c.activities?.[0]?.count || 0, // Map the count from the joined table
     featured: c.featured,
   }));
 
