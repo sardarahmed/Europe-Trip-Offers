@@ -44,7 +44,7 @@ export default function OffersPage() {
                 // Fetch all activities (filtering done client-side for simplicity)
                 const { data, error } = await supabase
                     .from('activities')
-                    .select('*, created_at, cities(name, country, latitude, longitude), stores(*)'); // Added stores and city coords
+                    .select('*, created_at, cities(name, country), stores(*)'); // Added stores
 
                 if (data && !error) {
                     const mapped: Activity[] = data.map((a: any) => ({

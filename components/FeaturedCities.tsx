@@ -33,7 +33,7 @@ export function FeaturedCities({ cities: initialCities }: FeaturedCitiesProps) {
     if (cities.length === 0) return null;
 
     return (
-        <section>
+        <section className="py-8">
             <Container>
                 <div className="flex items-center justify-between mb-8">
                     <div>

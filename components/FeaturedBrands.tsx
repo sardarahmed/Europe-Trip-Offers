@@ -13,7 +13,7 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
     if (stores.length === 0) return null;
 
     return (
-        <section className="py-12 border-b border-slate-100">
+        <section className="py-8 border-b border-slate-100">
             <Container>
                 <div className="flex flex-col md:flex-row items-center justify-between mb-8">
                     <h2 className="text-2xl font-bold text-slate-900">Trusted Partners & Top Brands</h2>

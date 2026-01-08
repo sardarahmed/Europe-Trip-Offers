@@ -39,7 +39,7 @@ export function FeaturedDeals({ activities: initialActivities }: FeaturedDealsPr
     if (activities.length === 0) return null;
 
     return (
-        <section>
+        <section className="py-8">
             <Container>
                 <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
                     <div>

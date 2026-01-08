@@ -127,7 +127,7 @@ export default async function Home() {
   }));
 
   return (
-    <div className="flex flex-col gap-16 pb-20">
+    <div className="flex flex-col gap-6 pb-12">
       <HeroSection
         title={heroProps.title}
         subtitle={heroProps.subtitle}

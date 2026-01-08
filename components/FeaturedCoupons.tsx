@@ -13,7 +13,7 @@ export function FeaturedCoupons({ coupons }: FeaturedCouponsProps) {
     if (coupons.length === 0) return null;
 
     return (
-        <section className="bg-muted/30 py-16">
+        <section className="bg-muted/30 py-12">
             <Container>
                 <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
                     <div>
