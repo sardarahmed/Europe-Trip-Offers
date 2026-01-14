@@ -34,11 +34,18 @@ export default async function StoreDetailPage({ params }: PageProps) {
         slug: storeData.slug,
         logoUrl: storeData.logo_url,
         description: storeData.description,
-        websiteUrl: storeData.website_url,
+        websiteUrl: storeData.website_url || (storeData.slug.toLowerCase() === 'expedia' ? 'https://expedia.com/affiliate/ePXMSdi' : ''),
         isFeatured: storeData.is_featured,
         rating: storeData.rating,
         reviewCount: storeData.review_count
     };
+
+    // Auto-fix DB if missing
+    if (storeData.slug.toLowerCase() === 'expedia' && !storeData.website_url) {
+        await supabase.from('stores')
+            .update({ website_url: 'https://expedia.com/affiliate/ePXMSdi' })
+            .eq('id', storeData.id);
+    }
 
     // 2. Fetch Linked Coupons
     const { data: couponsData } = await supabase

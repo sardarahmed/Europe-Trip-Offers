@@ -9,6 +9,7 @@ export function AdminNav() {
     const pathname = usePathname();
 
     const links = [
+        { href: '/admin/stores', label: 'All Stores' },
         { href: '/admin/add-activity', label: 'Add Activity' },
         { href: '/admin/add-city', label: 'Add City' },
         { href: '/admin/add-coupon', label: 'Add Coupon' },
