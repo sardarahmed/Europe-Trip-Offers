@@ -21,27 +21,29 @@ async function scrapeDeals() {
     console.log('Starting deal scraper...');
 
     // 1. Fetch Stores
-    const { data: stores, error: storeError } = await supabase
+    const { data: allStores, error: storeError } = await supabase
         .from('stores')
-        .select('*')
-        .not('website_url', 'is', null);
+        .select('id, name, slug, website_url, logo_url, affiliate_link_deals, affiliate_link_coupons');
 
     if (storeError) {
         console.error('Error fetching stores:', storeError);
         return;
     }
 
-    if (!stores || stores.length === 0) {
+    console.log('Fetched stores raw:', allStores?.map(s => `${s.name} (${s.website_url})`));
+    const stores = allStores?.filter(s => s.website_url && s.website_url.length > 5 && !s.website_url.includes('localhost')) || [];
+
+    if (stores.length === 0) {
         console.log('No stores with URLs found.');
         return;
     }
 
-    console.log(`Found ${stores.length} stores to check.`);
+    console.log(`Found ${stores.length} valid stores to check.`);
 
     // 2. Launch Browser
     const browser = await puppeteer.launch({
-        headless: 'new', // new headless mode
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] // helpful for CI
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
     });
 
     let totalDealsAdded = 0;
@@ -52,60 +54,88 @@ async function scrapeDeals() {
 
         console.log(`\nProcessing ${store.name} (${store.website_url})...`);
         const affiliateLinkDeals = store.affiliate_link_deals || store.website_url;
-        const affiliateLinkCoupons = store.affiliate_link_coupons || store.website_url // Fallback
+        const affiliateLinkCoupons = store.affiliate_link_coupons || store.website_url;
 
         try {
             const page = await browser.newPage();
-            // Block images/fonts to save bandwidth
+            // Set User Agent to avoid 403
+            await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
             await page.setRequestInterception(true);
             page.on('request', (req) => {
-                if (['image', 'stylesheet', 'font'].includes(req.resourceType())) {
+                if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
                     req.abort();
                 } else {
                     req.continue();
                 }
             });
 
-            await page.goto(store.website_url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await page.goto(store.website_url, { waitUntil: 'networkidle2', timeout: 45000 });
 
-            // Get HTML for Cheerio (faster parsing)
             const content = await page.content();
             const $ = cheerio.load(content);
-            await page.close();
+            const pageTitle = $('title').text().trim();
+            console.log(`  Page Title: ${pageTitle}`);
 
             // 3. Generic Scraping Strategy
-            // Look for common e-commerce patterns
             const scrapedItems: any[] = [];
 
-            // Selector 1: Schema.org Product
+            // Selector 1: Schema.org Product/Offer/Event
             $('script[type="application/ld+json"]').each((_, el) => {
                 try {
                     const json = JSON.parse($(el).html() || '{}');
-                    if (json['@type'] === 'Product' || json['@type'] === 'Offer') {
-                        scrapedItems.push({
-                            title: json.name,
-                            price: json.offers?.price || json.price,
-                            image: json.image,
-                            link: store.website_url // We use store link as base, specific logic below
-                        });
-                    }
-                } catch (e) { } // ignore json parse errors
+                    const processEntity = (entity: any) => {
+                        // Check for common e-commerce types
+                        const type = entity['@type'];
+                        if (['Product', 'Offer', 'Event', 'Hotel', 'LodgingBusiness', 'TouristAttraction'].includes(type)) {
+                            const price = entity.offers?.price || entity.price || entity.lowPrice || entity.priceRange;
+                            const name = entity.name || entity.headline;
+                            if (name && (price || entity.offers)) {
+                                scrapedItems.push({
+                                    title: name,
+                                    price: typeof price === 'string' ? parseFloat(price.replace(/[^0-9.]/g, '')) : (price || 0),
+                                    image: entity.image,
+                                    link: store.website_url
+                                });
+                            }
+                        }
+                    };
+
+                    if (Array.isArray(json)) json.forEach(processEntity);
+                    else if (json['@graph']) json['@graph'].forEach(processEntity);
+                    else processEntity(json);
+
+                } catch (e) { }
             });
 
-            // Selector 2: Common visual classes (fallback)
+            // Selector 2: Visual Scrape (more aggressive)
             if (scrapedItems.length === 0) {
-                // Try searching for generic elements
-                $('[class*="product"], [class*="item"], [class*="card"]').each((_, el) => {
-                    if (scrapedItems.length > 5) return; // Limit items per store per run
-                    const title = $(el).find('h1, h2, h3, [class*="title"], [class*="name"]').first().text().trim();
-                    const priceText = $(el).find('[class*="price"]').first().text().trim();
-                    const img = $(el).find('img').first().attr('src');
+                // Look for containers with price-like text
+                const priceRegex = /[$€£]\s*[0-9]+(\.[0-9]{2})?/;
 
-                    if (title && priceText && title.length > 5 && title.length < 100) {
-                        // Extract number from price
-                        const price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
-                        if (!isNaN(price) && price > 0) {
-                            scrapedItems.push({ title, price, image: img });
+                $('div, article, li').each((_, el) => {
+                    if (scrapedItems.length > 5) return; // Limit
+
+                    const text = $(el).text();
+                    if (text.length > 500) return; // Skip big containers
+
+                    // Must contain price
+                    const priceMatch = text.match(priceRegex);
+                    if (priceMatch) {
+                        // Must contain title-like element
+                        const titleEl = $(el).find('h1, h2, h3, h4, h5, strong, .title').first();
+                        const title = titleEl.text().trim();
+
+                        // Must have image
+                        const img = $(el).find('img').first().attr('src') || $(el).find('img').first().attr('data-src');
+
+                        if (title && title.length > 5 && title.length < 100 && img) {
+                            const priceRef = parseFloat(priceMatch[0].replace(/[^0-9.]/g, ''));
+                            scrapedItems.push({
+                                title: title,
+                                price: priceRef,
+                                image: img
+                            });
                         }
                     }
                 });
