@@ -12,6 +12,8 @@ export interface Store {
     logoUrl: string; // db column: logo_url
     description?: string;
     websiteUrl?: string; // db column: website_url
+    affiliateLinkDeals?: string; // db column: affiliate_link_deals
+    affiliateLinkCoupons?: string; // db column: affiliate_link_coupons
     isFeatured: boolean; // db column: is_featured
     rating: number;
     reviewCount: number; // db column: review_count
