@@ -16,7 +16,7 @@ export default async function Home() {
     supabase.from('hero_content').select('*').eq('page_slug', 'home').single(),
 
     // 2. Featured Cities
-    supabase.from('cities').select('*, activities(count)').eq('featured', true).limit(4),
+    supabase.from('cities').select('*, activities(count)').eq('featured', true).limit(8),
 
     // 3. Featured Coupons
     supabase.from('coupons').select('*, stores(*)').eq('is_featured', true).limit(12),
