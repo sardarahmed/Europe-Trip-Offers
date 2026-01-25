@@ -36,18 +36,14 @@ console.log(`Supabase Client Initialized. Using Service Role Key: ${isServiceRol
 if (!isServiceRole) console.warn('WARNING: Using Anon Key. Database writes may fail due to RLS.');
 
 function getProxies() {
-    // Hardcoded proxies from user-provided file for reliability in CI/CD
+    // Hardcoded proxies from user-provided Oxylabs credentials
     const rawProxies = [
-        "142.111.48.253:7030:vcblyzla:4lphk4ch52by",
-        "23.95.150.145:6114:vcblyzla:4lphk4ch52by",
-        "198.23.239.134:6540:vcblyzla:4lphk4ch52by",
-        "107.172.163.27:6543:vcblyzla:4lphk4ch52by",
-        "198.105.121.200:6462:vcblyzla:4lphk4ch52by",
-        "64.137.96.74:6641:vcblyzla:4lphk4ch52by",
-        "84.247.60.125:6095:vcblyzla:4lphk4ch52by",
-        "216.10.27.159:6837:vcblyzla:4lphk4ch52by",
-        "23.26.71.145:5628:vcblyzla:4lphk4ch52by",
-        "23.27.208.120:5830:vcblyzla:4lphk4ch52by"
+        "dc.oxylabs.io:8001:user-ahmed_XovP0-country-US:+D3+UJvp_PFYk",
+        "dc.oxylabs.io:8002:user-ahmed_XovP0-country-US:+D3+UJvp_PFYk",
+        "dc.oxylabs.io:8003:user-ahmed_XovP0-country-US:+D3+UJvp_PFYk",
+        "dc.oxylabs.io:8004:user-ahmed_XovP0-country-US:+D3+UJvp_PFYk",
+        "dc.oxylabs.io:8005:user-ahmed_XovP0-country-US:+D3+UJvp_PFYk",
+        "dc.oxylabs.io:8000:user-ahmed_XovP0-country-US:+D3+UJvp_PFYk" // Rotating endpoint as backup
     ];
 
     return rawProxies.map(line => {
