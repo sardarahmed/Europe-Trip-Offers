@@ -28,7 +28,12 @@ if (!supabaseUrl || !supabaseKey) {
     console.error('KEY:', supabaseKey ? 'Set' : 'Missing');
     process.exit(1);
 }
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false
+    }
+});
 
 // Debug Auth Level
 const isServiceRole = supabaseKey === process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -73,7 +78,7 @@ async function ensureStore() {
     }).select().single();
 
     if (error) {
-        console.error('Error creating Viator store:', JSON.stringify(error, null, 2));
+        console.error('Error creating Viator store:', error.message || error);
         return null;
     }
     return newStore.id;
@@ -96,7 +101,7 @@ async function ensureFamousCities() {
             }, { onConflict: 'slug' }).select().single();
 
             if (error) {
-                console.error(`Error upserting city ${city.name}:`, JSON.stringify(error, null, 2));
+                console.error(`Error upserting city ${city.name}:`, error.message || error);
             } else {
                 city.id = data.id;
             }
