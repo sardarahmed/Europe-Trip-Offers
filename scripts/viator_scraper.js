@@ -28,6 +28,11 @@ if (!supabaseUrl || !supabaseKey) {
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Debug Auth Level
+const isServiceRole = supabaseKey === process.env.SUPABASE_SERVICE_ROLE_KEY;
+console.log(`Supabase Client Initialized. Using Service Role Key: ${isServiceRole}`);
+if (!isServiceRole) console.warn('WARNING: Using Anon Key. Database writes may fail due to RLS.');
+
 function getProxies() {
     // Hardcoded proxies from user-provided file for reliability in CI/CD
     const rawProxies = [
