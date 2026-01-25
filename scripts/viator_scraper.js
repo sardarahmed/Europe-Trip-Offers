@@ -24,6 +24,8 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PU
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('Missing Supabase credentials');
+    console.error('URL:', supabaseUrl ? 'Set' : 'Missing');
+    console.error('KEY:', supabaseKey ? 'Set' : 'Missing');
     process.exit(1);
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -84,28 +86,27 @@ async function ensureStore() {
 async function ensureFamousCities() {
     console.log('Ensuring famous cities exist...');
     for (const city of FAMOUS_CITIES) {
-        const { data: existing } = await supabase.from('cities').select('id').ilike('name', city.name).maybeSingle();
+        // We use name as a key to find existing, but upsert on slug might be safer if unique check
         const slug = city.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-        let cityId;
-        if (existing) {
-            cityId = existing.id;
-            await supabase.from('cities').update({ featured: true, image_url: city.imageUrl }).eq('id', cityId);
-        } else {
-            const { data: newCity, error } = await supabase.from('cities').insert({
+        try {
+            // Upsert city based on slug
+            const { data, error } = await supabase.from('cities').upsert({
                 name: city.name,
                 slug: slug,
                 country: city.country,
                 image_url: city.imageUrl,
                 featured: true
-            }).select().single();
+            }, { onConflict: 'slug' }).select().single();
+
             if (error) {
-                console.error(`Error creating city ${city.name}:`, JSON.stringify(error, null, 2));
-                continue;
+                console.error(`Error upserting city ${city.name}:`, JSON.stringify(error, null, 2));
+            } else {
+                city.id = data.id;
             }
-            cityId = newCity.id;
+        } catch (e) {
+            console.error(`Exception checking city ${city.name}:`, e.message);
         }
-        city.id = cityId;
     }
 }
 
