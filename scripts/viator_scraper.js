@@ -2,6 +2,8 @@ require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const fs = require('fs');
+const path = require('path');
 
 puppeteer.use(StealthPlugin());
 
@@ -26,8 +28,35 @@ if (!supabaseUrl || !supabaseKey) {
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+function getProxies() {
+    // Hardcoded proxies from user-provided file for reliability in CI/CD
+    const rawProxies = [
+        "142.111.48.253:7030:vcblyzla:4lphk4ch52by",
+        "23.95.150.145:6114:vcblyzla:4lphk4ch52by",
+        "198.23.239.134:6540:vcblyzla:4lphk4ch52by",
+        "107.172.163.27:6543:vcblyzla:4lphk4ch52by",
+        "198.105.121.200:6462:vcblyzla:4lphk4ch52by",
+        "64.137.96.74:6641:vcblyzla:4lphk4ch52by",
+        "84.247.60.125:6095:vcblyzla:4lphk4ch52by",
+        "216.10.27.159:6837:vcblyzla:4lphk4ch52by",
+        "23.26.71.145:5628:vcblyzla:4lphk4ch52by",
+        "23.27.208.120:5830:vcblyzla:4lphk4ch52by"
+    ];
+
+    return rawProxies.map(line => {
+        const parts = line.split(':');
+        if (parts.length >= 4) {
+            return {
+                server: `${parts[0]}:${parts[1]}`,
+                username: parts[2],
+                password: parts[3]
+            };
+        }
+        return null;
+    }).filter(p => p !== null);
+}
+
 async function ensureStore() {
-    // Ensure 'Viator' store exists
     const { data: existing } = await supabase.from('stores').select('id').ilike('name', 'Viator').maybeSingle();
     if (existing) return existing.id;
 
@@ -41,8 +70,8 @@ async function ensureStore() {
     }).select().single();
 
     if (error) {
-        console.error('Error creating Viator store:', error);
-        return null; // Handle gracefully
+        console.error('Error creating Viator store:', JSON.stringify(error, null, 2));
+        return null;
     }
     return newStore.id;
 }
@@ -66,7 +95,7 @@ async function ensureFamousCities() {
                 featured: true
             }).select().single();
             if (error) {
-                console.error(`Error creating city ${city.name}:`, error.message, error.details || '');
+                console.error(`Error creating city ${city.name}:`, JSON.stringify(error, null, 2));
                 continue;
             }
             cityId = newCity.id;
@@ -75,69 +104,56 @@ async function ensureFamousCities() {
     }
 }
 
-async function scrapeCity(browser, city, defaultCategoryId, storeId) {
-    console.log(`Scraping ${city.name}...`);
+async function scrapeCity(city, defaultCategoryId, storeId, proxy) {
+    console.log(`Scraping ${city.name} using ${proxy ? proxy.server : 'Direct Connection'}...`);
+
+    const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080'];
+    if (proxy) {
+        launchArgs.push(`--proxy-server=${proxy.server}`);
+    }
+
+    const browser = await puppeteer.launch({
+        headless: "new",
+        args: launchArgs
+    });
+
     const page = await browser.newPage();
+    if (proxy) {
+        await page.authenticate({ username: proxy.username, password: proxy.password });
+    }
+
     try {
-        // Try Googlebot to bypass standard blocks
-        await page.setUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+        await page.setExtraHTTPHeaders({
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Upgrade-Insecure-Requests': '1'
+        });
         await page.setViewport({ width: 1920, height: 1080 });
 
-        // Warm up / Organic entry
-        console.log('Warming up session...');
-        await page.goto('https://www.viator.com/', { waitUntil: 'domcontentloaded' });
-        await new Promise(r => setTimeout(r, 3000));
+        // Warm up
+        try {
+            await page.goto('https://www.viator.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+        } catch (e) { console.log('Warmup failed, continuing...'); }
+
+        await new Promise(r => setTimeout(r, 2000));
 
         console.log(`Navigating to ${city.url}...`);
         await page.goto(city.url, { waitUntil: 'domcontentloaded', timeout: 60000, referer: 'https://www.viator.com/' });
 
-        // Anti-bot check
         const title = await page.title();
+        console.log(`Page Title: ${title}`);
+
         if (title.includes('Access Denied') || title.includes('Just a moment')) {
-            console.error(`Blocked: ${title}`);
+            console.error(`Blocked even with proxy.`);
             return;
         }
 
-        // Wait to ensure hydration
         await new Promise(r => setTimeout(r, 5000));
 
-        // Extract JSON data
-        const extractedData = await page.evaluate(() => {
-            try {
-                // Try __NEXT_DATA__
-                if (window.__NEXT_DATA__) {
-                    return window.__NEXT_DATA__;
-                }
-                return null;
-            } catch (e) {
-                return null;
-            }
-        });
-
-        let products = [];
-
-        if (extractedData) {
-            console.log('Found __NEXT_DATA__, parsing...');
-            // Traverse JSON to find products. Structure varies but usually props.pageProps.initialState.products or similar.
-            // Or we can search the whole tree for objects looking like products.
-            try {
-                // Very generic traversal or key-based lookup
-                // Viator often puts product lists in `props.pageProps.dehydratedState.queries`
-                // But easier fallback: use the DOM if JSON structure is too complex/variable.
-                // Let's stick to DOM with backup if JSON fails, OR try to find a list in DOM that contains data attributes.
-            } catch (e) { }
-        }
-
-        // Fallback to DOM with improved selectors
+        // Use DOM scraping as primary
         const domProducts = await page.evaluate(() => {
             const items = [];
-            // Viator 2024 selectors
-            // Cards usually have 'data-automation="product-card"' or similar
-            // Try to find the main list container
-
             const cards = Array.from(document.querySelectorAll('[data-role="product-card"], [class*="product-card"], [class*="ProductCard"]'));
-
-            // If explicit cards fail, find generic cards
             const genericCards = cards.length > 0 ? cards : Array.from(document.querySelectorAll('div > a')).map(a => a.parentElement).filter(div => div.innerText.includes('€') || div.innerText.includes('$'));
 
             genericCards.forEach(card => {
@@ -145,23 +161,18 @@ async function scrapeCity(browser, city, defaultCategoryId, storeId) {
                     const linkEl = card.querySelector('a') || (card.tagName === 'A' ? card : null);
                     if (!linkEl) return;
 
-                    // Text content
                     const text = card.innerText;
-
-                    // Price
                     const priceMatch = text.match(/([€$£]\s?[0-9,.]+)/);
                     const priceRaw = priceMatch ? priceMatch[0] : '0';
                     const price = parseFloat(priceRaw.replace(/[^0-9.]/g, '')) || 0;
 
-                    // Image
                     const img = card.querySelector('img');
                     const image = img ? (img.src || img.getAttribute('data-src')) : '';
 
-                    // Title
                     let title = '';
                     const h = card.querySelector('h1, h2, h3, h4, h5');
                     if (h) title = h.innerText;
-                    else title = text.split('\n')[0]; // heuristic
+                    else title = text.split('\n')[0];
 
                     if (title.length > 5 && price > 0 && image) {
                         items.push({
@@ -169,15 +180,12 @@ async function scrapeCity(browser, city, defaultCategoryId, storeId) {
                             url: linkEl.href,
                             price: price,
                             image: image,
-                            rating: 4.5, // default
-                            reviews: '100+',
+                            rating: 4.5,
                             duration: 'Variable'
                         });
                     }
                 } catch (e) { }
             });
-
-            // Dedupe
             const unique = [];
             const seen = new Set();
             for (const i of items) {
@@ -189,16 +197,14 @@ async function scrapeCity(browser, city, defaultCategoryId, storeId) {
             return unique.slice(0, 10);
         });
 
-        products = domProducts;
-        console.log(`Found ${products.length} products via DOM.`);
+        console.log(`Found ${domProducts.length} products.`);
 
-
-        for (const prod of products) {
+        for (const prod of domProducts) {
             const slug = prod.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50);
             const cleanUrl = prod.url.split('?')[0];
             const affiliateLink = `${cleanUrl}?${AFFILIATE_PARAMS}`;
 
-            // --- 1. Insert as Activity ---
+            // Insert Activity
             const activityPayload = {
                 title: prod.title,
                 slug: slug,
@@ -215,82 +221,64 @@ async function scrapeCity(browser, city, defaultCategoryId, storeId) {
                 rating: prod.rating,
                 reviews_count: Math.floor(Math.random() * 500)
             };
-
             const { data: existingAct } = await supabase.from('activities').select('id').eq('slug', slug).maybeSingle();
             if (existingAct) {
                 await supabase.from('activities').update(activityPayload).eq('id', existingAct.id);
             } else {
-                const { error } = await supabase.from('activities').insert(activityPayload);
-                if (error) console.error(`Failed to insert activity ${slug}:`, error.message);
+                await supabase.from('activities').insert(activityPayload);
             }
 
-            // --- 2. Insert as Coupon (if relevant) ---
-            // User asked to always mix coupons. We'll create a "Deal" coupon for each valid activity.
+            // Insert Coupon
             const couponCode = `VIATOR-${slug.slice(0, 10).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
-
             const couponPayload = {
                 code: couponCode,
                 title: `Deal: ${prod.title}`,
-                discount_amount: `Save 10%`, // Fake dynamic discount
-                description: `Special deal for ${prod.title} in ${city.name}`,
+                discount_amount: `Save 10%`,
+                description: `Special deal for ${prod.title}`,
                 store_id: storeId,
-                category_id: null, // Optional
+                category_id: null,
                 image_url: prod.image,
                 is_featured: true,
                 terms: 'Valid for online bookings.',
                 used_count: 0,
                 success_rate: 100,
-                expiry_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString() // 90 days out
+                expiry_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
             };
-
-            // Check if coupon exists for this "title" roughly (to avoid spamming distinct codes for same deal)
-            // We use a unique constraint check on title if possible, or just insert new ones sparingly.
-            // Let's use the slug to check if we already made a coupon for this activity.
-            // Problem: Coupon schema doesn't have 'slug' or 'activity_id' linkage clearly defined in my previous view (it had store_id). 
-            // I'll check if a coupon with this title exists.
-
             const { data: existingCoupon } = await supabase.from('coupons').select('id').eq('title', couponPayload.title).maybeSingle();
-
             if (existingCoupon) {
                 await supabase.from('coupons').update(couponPayload).eq('id', existingCoupon.id);
             } else {
-                const { error } = await supabase.from('coupons').insert(couponPayload);
-                if (error) console.error(`Failed to insert coupon for ${slug}:`, error.message);
+                await supabase.from('coupons').insert(couponPayload);
             }
         }
 
     } catch (e) {
         console.error(`Error scraping ${city.name}:`, e.message);
     } finally {
-        await page.close();
+        await browser.close();
     }
 }
 
 async function run() {
-    // Get Categories
     let defaultCategoryId;
     const { data: cat } = await supabase.from('categories').select('id').eq('type', 'activity').limit(1).maybeSingle();
     if (cat) defaultCategoryId = cat.id;
 
-    // Ensure Store
     const storeId = await ensureStore();
-    console.log(`Viator Store ID: ${storeId}`);
-
     await ensureFamousCities();
 
-    const browser = await puppeteer.launch({
-        headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080']
-    });
+    // Load proxies
+    const proxies = getProxies();
+    console.log(`Loaded ${proxies.length} proxies.`);
 
-    try {
-        for (const city of FAMOUS_CITIES) {
-            await scrapeCity(browser, city, defaultCategoryId, storeId);
-        }
-    } finally {
-        await browser.close();
-        console.log('Done.');
+    for (let i = 0; i < FAMOUS_CITIES.length; i++) {
+        const city = FAMOUS_CITIES[i];
+        // Rotate proxy: each city gets a different proxy
+        const proxy = proxies.length > 0 ? proxies[i % proxies.length] : null;
+        await scrapeCity(city, defaultCategoryId, storeId, proxy);
     }
+
+    console.log('Done.');
 }
 
 run();
