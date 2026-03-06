@@ -69,13 +69,9 @@ export function CouponCard({ coupon }: CouponCardProps) {
                     <div className="flex justify-between items-start gap-4 mb-3">
                         <div className="flex-1">
                             {coupon.store && (
-                                <Link 
-                                    href={`/stores/${coupon.store.redirectSlug || coupon.store.slug}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-sm font-semibold text-blue-600 mb-1 tracking-wide uppercase hover:underline inline-block"
-                                >
+                                <div className="text-sm font-semibold text-blue-600 mb-1 tracking-wide uppercase">
                                     {coupon.store.name}
-                                </Link>
+                                </div>
                             )}
                             <h3 className="font-bold text-xl md:text-2xl leading-tight group-hover:text-primary transition-colors line-clamp-2">
                                 {coupon.title}

@@ -41,7 +41,6 @@ export default function StoresPage() {
                     isFeatured: s.is_featured,
                     rating: s.rating,
                     reviewCount: s.review_count,
-                    redirectSlug: s.redirect_slug,
                     active_offers_count: (s.coupons?.[0]?.count || 0) + (s.activities?.[0]?.count || 0)
                 }));
                 setAllStores(mapped);
@@ -105,7 +104,7 @@ export default function StoresPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredStores.map(store => (
                             <Link
-                                href={`/stores/${store.redirectSlug || store.slug}`}
+                                href={`/stores/${store.slug}`}
                                 key={store.id}
                                 className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center"
                             >
