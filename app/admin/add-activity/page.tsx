@@ -32,7 +32,8 @@ export default function AddActivityPage() {
         affiliate_link: '',
         description: '',
         duration: '2 hours',
-        highlights: '' // newline separated
+        highlights: '', // newline separated
+        used_count: '' // New
     });
 
     useEffect(() => {
@@ -98,6 +99,7 @@ export default function AddActivityPage() {
                 description: formData.description,
                 duration: formData.duration,
                 highlights: formData.highlights.split('\n').filter(line => line.trim() !== ''),
+                used_count: formData.used_count ? parseInt(formData.used_count) : 0, // NEW
                 is_featured: true // Default to featured for visibility, user can change later
             };
 
@@ -265,14 +267,26 @@ Panoramic views"
                     />
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">Duration</label>
-                    <Input
-                        name="duration"
-                        value={formData.duration}
-                        onChange={handleChange}
-                        placeholder="e.g. 3 hours"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Duration</label>
+                        <Input
+                            name="duration"
+                            value={formData.duration}
+                            onChange={handleChange}
+                            placeholder="e.g. 3 hours"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Used Count (Optional)</label>
+                        <Input
+                            name="used_count"
+                            type="number"
+                            value={formData.used_count}
+                            onChange={handleChange}
+                            placeholder="e.g. 150 (Defaults to 0)"
+                        />
+                    </div>
                 </div>
 
                 <div className="pt-4">

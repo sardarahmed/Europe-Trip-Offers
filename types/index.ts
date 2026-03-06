@@ -59,6 +59,7 @@ export interface Activity {
     createdAt?: string;
     latitude?: number;
     longitude?: number;
+    usedCount?: number; // db column: used_count
 }
 
 export interface Coupon {
