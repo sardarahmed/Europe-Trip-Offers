@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ExternalLink } from 'lucide-react';
 import { AdminNav } from '@/components/AdminNav';
 import { Container } from '@/components/Container';
 
@@ -19,7 +20,8 @@ export default function AddStore() {
         logo_url: '',
         website_url: '',
         is_featured: false,
-        rating: '4.5'
+        rating: '4.5',
+        redirect_slug: ''
     });
 
     useEffect(() => {
@@ -38,7 +40,8 @@ export default function AddStore() {
                 ...prev,
                 logo_url: selected.logo_url || '',
                 website_url: selected.website_url || '',
-                description: selected.description || ''
+                description: selected.description || '',
+                redirect_slug: selected.slug
             }));
         }
     };
@@ -70,7 +73,8 @@ export default function AddStore() {
                 description: formData.description.trim(),
                 logo_url: formData.logo_url.trim(),
                 website_url: formData.website_url.trim(),
-                rating: parseFloat(formData.rating)
+                rating: parseFloat(formData.rating),
+                redirect_slug: formData.redirect_slug.trim() || null
             };
 
             const { error } = await supabase
@@ -80,7 +84,8 @@ export default function AddStore() {
             if (error) throw error;
 
             alert('Store added successfully!');
-            router.push(`/stores/${payload.slug}`);
+            const targetPath = payload.redirect_slug ? `/stores/${payload.redirect_slug}` : `/stores/${payload.slug}`;
+            router.push(targetPath);
             router.refresh();
         } catch (error: any) {
             alert('Error adding store: ' + error.message);
@@ -159,6 +164,19 @@ export default function AddStore() {
                                     <img src={formData.logo_url} alt="Preview" className="h-8 object-contain" />
                                 </div>
                             )}
+                        </div>
+
+                        <div className="space-y-2 text-blue-600 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                             <label className="text-sm font-bold flex items-center gap-2">
+                                <ExternalLink className="h-4 w-4" /> Redirect to Master Store? (Optional)
+                             </label>
+                             <Input
+                                name="redirect_slug"
+                                placeholder="e.g. viator (Leave empty if this is a master brand)"
+                                value={formData.redirect_slug}
+                                onChange={handleChange}
+                             />
+                             <p className="text-[10px] uppercase font-bold text-blue-400">If set, clicking this store will redirect users to the master store page.</p>
                         </div>
 
                         <div className="space-y-2">

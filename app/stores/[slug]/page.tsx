@@ -42,8 +42,8 @@ export default async function StoreDetailPage({ params }: PageProps) {
         reviewCount: storeData.review_count,
         customDiscountText: storeData.custom_discount_text,
         usedDealsCount: storeData.used_deals_count,
-        popupCode: storeData.popup_code,
-        popupLink: storeData.popup_link
+        popupLink: storeData.popup_link,
+        redirectSlug: storeData.redirect_slug
     };
 
     // Auto-fix DB if missing

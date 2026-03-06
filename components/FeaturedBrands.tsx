@@ -84,7 +84,7 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                                 </h3>
                                 <div className="mt-2">
                                     <Link
-                                        href={`/stores/${store.slug}`}
+                                        href={`/stores/${store.redirectSlug || store.slug}`}
                                         className="text-blue-600 text-xs font-semibold hover:underline flex items-center"
                                     >
                                         <span className="mr-1 text-[10px]">▶</span> See Details
@@ -95,7 +95,7 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                             {/* Full Width Get Deal Button */}
                             <div className="mt-4 pt-3 w-full z-10">
                                 <Link
-                                    href={`/stores/${store.slug}?showPopup=true`}
+                                    href={`/stores/${store.redirectSlug || store.slug}?showPopup=true`}
                                     className="block w-full text-center text-sm font-bold text-white bg-[#FF6347] hover:bg-red-500 py-3 rounded-lg transition-colors shadow-sm tracking-wide"
                                 >
                                     GET DEAL
