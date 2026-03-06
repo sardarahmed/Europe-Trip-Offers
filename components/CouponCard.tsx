@@ -45,103 +45,93 @@ export function CouponCard({ coupon }: CouponCardProps) {
 
     return (
         <>
-            <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-visible rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all flex flex-col h-full">
-                {/* Top Border Accent (Optional) */}
-                <div className="h-1.5 w-full bg-primary shrink-0 rounded-t-xl" />
+            <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-hidden rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all flex flex-col sm:flex-row min-h-[160px]">
+                {/* Left Side: Logo & Discount Area */}
+                <div className="relative flex flex-col items-center justify-center p-6 bg-slate-50 border-b sm:border-b-0 sm:border-r border-slate-100 sm:w-1/3 min-w-[180px]">
+                    {coupon.store && coupon.store.logoUrl ? (
+                        <div className="h-24 w-24 rounded-full border border-slate-200 bg-white flex items-center justify-center p-3 shadow-sm overflow-hidden mb-3">
+                            <img src={coupon.store.logoUrl} alt={coupon.store.name} className="object-contain w-full h-full" />
+                        </div>
+                    ) : (
+                        <div className="h-24 w-24 rounded-full border border-slate-200 bg-white flex items-center justify-center p-3 shadow-sm text-sm font-bold text-slate-400 mb-3">
+                            Logo
+                        </div>
+                    )}
+                    
+                    {/* Discount Amount Badge */}
+                    <div className="inline-flex items-center justify-center rounded bg-red-100 text-red-600 px-3 py-1 text-base font-bold border border-red-200 shadow-sm mt-auto">
+                        {coupon.discountAmount}
+                    </div>
+                </div>
 
-                {/* Content Section */}
-                <div className="flex-1 p-4 flex flex-col space-y-3">
-
-                    {/* Header Row: Logo + Discount + Trust */}
-                    <div className="flex items-start justify-between gap-3 mb-1">
-                        {/* Logo Wrapper */}
-                        {coupon.store && coupon.store.logoUrl ? (
-                            <div className="h-12 w-12 rounded-full border border-slate-200 bg-white flex items-center justify-center p-1.5 shrink-0 shadow-sm overflow-hidden">
-                                <img src={coupon.store.logoUrl} alt={coupon.store.name} className="object-contain w-full h-full" />
-                            </div>
-                        ) : (
-                            <div className="h-12 w-12 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center p-1.5 shrink-0 shadow-sm text-xs font-bold text-slate-400">
-                                Logo
-                            </div>
-                        )}
-
-                        <div className="flex flex-col items-end gap-1">
-                            {/* Discount Amount Badge */}
-                            <div className="inline-flex items-center justify-center rounded bg-red-100 text-red-600 px-2 py-0.5 text-sm font-bold border border-red-200">
-                                {coupon.discountAmount}
-                            </div>
-                            {/* Trust Signals */}
-                            <div className="flex items-center gap-1 text-[10px] font-medium text-green-600">
-                                <CheckCircle className="h-3 w-3" />
-                                {getVerifiedText(coupon.lastVerified)}
-                            </div>
+                {/* Right Side: Content Area */}
+                <div className="flex-1 p-5 flex flex-col">
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                        <div className="flex-1">
+                            {coupon.store && (
+                                <div className="text-sm font-medium text-slate-500 mb-1">
+                                    {coupon.store.name}
+                                </div>
+                            )}
+                            <h3 className="font-bold text-xl leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                                {coupon.title}
+                            </h3>
+                        </div>
+                        
+                        {/* Trust Signal */}
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-green-600 shrink-0 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            {getVerifiedText(coupon.lastVerified)}
                         </div>
                     </div>
 
-                    <h3 className="font-bold text-lg leading-snug group-hover:text-primary transition-colors line-clamp-2 min-h-[44px]">
-                        {coupon.title}
-                    </h3>
-
-                    {/* usage stats */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-sm text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-1.5">
+                            <Users className="h-4 w-4" />
                             <span>{coupon.usedCount?.toLocaleString() || '100+'} used</span>
                         </div>
-                        <div className="flex items-center gap-1 text-green-600 font-bold">
-                            <Percent className="h-3 w-3" />
+                        <div className="flex items-center gap-1.5 text-green-600 font-medium border-l pl-4 border-slate-200">
+                            <Percent className="h-4 w-4" />
                             <span>{coupon.successRate || 95}% success</span>
                         </div>
                     </div>
 
                     {/* Description Toggle */}
-                    <div className="w-full">
+                    <div className="mb-4">
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setShowTerms(!showTerms);
                             }}
-                            className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 w-full"
+                            className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1"
                         >
                             {showTerms ? 'Hide details' : 'Show details'}
-                            {showTerms ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            {showTerms ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         </button>
 
                         {showTerms && (
                             <motion.div
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
-                                className="mt-2 space-y-2 overflow-hidden"
+                                className="mt-3 space-y-3 overflow-hidden"
                             >
-                                <p className="text-sm text-slate-600 line-clamp-2 mt-1 whitespace-pre-wrap">
+                                <p className="text-sm text-slate-600 line-clamp-2 whitespace-pre-wrap">
                                     {coupon.description}
                                 </p>
                                 {coupon.terms && (
-                                    <div className="text-xs text-slate-400 bg-slate-50 p-2 rounded">
-                                        <p className="font-semibold mb-1">Terms & Conditions:</p>
+                                    <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                        <p className="font-semibold text-slate-700 mb-1">Terms & Conditions:</p>
                                         {coupon.terms}
                                     </div>
                                 )}
                             </motion.div>
                         )}
                     </div>
-                </div>
 
-                {/* Divider */}
-                <div className="relative h-px w-full bg-border" />
-
-                {/* Bottom Section: Store Label & Reveal Button */}
-                <div className="p-3 bg-muted/10 flex items-center justify-between gap-2 mt-auto rounded-b-xl">
-                    {/* Store Info */}
-                    {coupon.store && (
-                        <div className="flex items-center gap-1.5 shrink-0 text-slate-500 font-medium text-xs">
-                            Store: <span className="font-bold text-slate-700">{coupon.store.name}</span>
-                        </div>
-                    )}
-
-                    {/* Button */}
-                    <div className="flex-1 max-w-[140px]">
+                    {/* Action Button */}
+                    <div className="mt-auto pt-4 flex justify-end">
                         <Button
                             onClick={(e) => {
                                 const fallbackViator = "https://www.viator.com/?pid=P00275081&mcid=42383&medium=link&medium_version=selector&campaign=new-1";
@@ -163,7 +153,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                                     handleReveal(e);
                                 }
                             }}
-                            className={`w-full font-bold text-sm h-10 text-white shadow-md hover:shadow-lg transition-all ${
+                            className={`w-full sm:w-auto min-w-[160px] font-bold text-base h-11 text-white shadow-md hover:shadow-lg transition-all ${
                                 coupon.type === 'deal' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-blue-600 hover:bg-blue-700'
                             }`}
                         >
