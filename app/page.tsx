@@ -64,7 +64,7 @@ export default async function Home() {
     isFeatured: s.is_featured,
     rating: s.rating,
     reviewCount: s.review_count
-  }));
+  })).sort((a, b) => a.slug === 'viator' ? -1 : b.slug === 'viator' ? 1 : 0);
 
   // Coupons
   const coupons: Coupon[] = (couponsResult.data || []).map((c: any) => ({
@@ -94,7 +94,7 @@ export default async function Home() {
       rating: c.stores.rating,
       reviewCount: c.stores.review_count
     } : undefined
-  }));
+  })).sort((a, b) => a.store?.slug === 'viator' ? -1 : b.store?.slug === 'viator' ? 1 : 0);
 
   // Activities
   const activities: Activity[] = (activitiesResult.data || []).map((a: any) => ({
@@ -124,7 +124,7 @@ export default async function Home() {
       rating: a.stores.rating,
       reviewCount: a.stores.review_count
     } : undefined
-  }));
+  })).sort((a, b) => a.store?.slug === 'viator' ? -1 : b.store?.slug === 'viator' ? 1 : 0);
 
   return (
     <div className="flex flex-col gap-6 pb-12">

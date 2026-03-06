@@ -77,7 +77,8 @@ export default function CouponsPage() {
         if (sort === 'Success Rate') {
             return (b.successRate || 0) - (a.successRate || 0);
         }
-        return 0; // Default
+        // Recommended (Default) - prioritize Viator
+        return a.store?.slug === 'viator' ? -1 : b.store?.slug === 'viator' ? 1 : 0;
     });
 
     return (

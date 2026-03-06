@@ -42,7 +42,7 @@ export default function StoresPage() {
                     rating: s.rating,
                     reviewCount: s.review_count,
                     active_offers_count: (s.coupons?.[0]?.count || 0) + (s.activities?.[0]?.count || 0)
-                }));
+                })).sort((a, b) => a.slug === 'viator' ? -1 : b.slug === 'viator' ? 1 : 0);
                 setAllStores(mapped);
             }
             setLoading(false);

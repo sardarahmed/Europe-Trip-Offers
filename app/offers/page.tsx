@@ -118,7 +118,8 @@ export default function OffersPage() {
             const distB = calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude);
             return distA - distB;
         }
-        return 0; // Default
+        // Recommended (Default) - prioritize Viator
+        return a.store?.slug === 'viator' ? -1 : b.store?.slug === 'viator' ? 1 : 0;
     });
 
     return (
