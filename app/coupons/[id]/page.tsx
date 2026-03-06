@@ -18,7 +18,7 @@ export default function CouponDetailsPage({ params }: { params: Promise<{ id: st
             try {
                 const { data: c, error } = await supabase
                     .from('coupons')
-                    .select('*')
+                    .select('*, store:stores(*)')
                     .eq('id', id)
                     .single();
 
@@ -33,7 +33,17 @@ export default function CouponDetailsPage({ params }: { params: Promise<{ id: st
                         imageUrl: c.image_url,
                         isFeatured: c.is_featured,
                         categoryId: c.category_id,
-                        activityId: c.activity_id
+                        activityId: c.activity_id,
+                        store: c.store ? {
+                            id: c.store.id,
+                            name: c.store.name,
+                            slug: c.store.slug,
+                            logoUrl: c.store.logo_url,
+                            websiteUrl: c.store.website_url,
+                            isFeatured: c.store.is_featured || false,
+                            rating: c.store.rating || 0,
+                            reviewCount: c.store.review_count || 0
+                        } : undefined
                     };
                     setCoupon(mapped);
                 }
@@ -117,11 +127,23 @@ export default function CouponDetailsPage({ params }: { params: Promise<{ id: st
                             <div className="flex gap-4">
                                 <div
                                     className="flex-1 bg-muted border border-dashed border-primary rounded-lg flex items-center justify-center font-mono font-bold text-xl select-all cursor-pointer hover:bg-muted/80 transition-colors"
-                                    onClick={() => navigator.clipboard.writeText(coupon.code)}
+                                    onClick={() => navigator.clipboard.writeText(coupon.code || '')}
                                 >
-                                    {coupon.code}
+                                    {coupon.code || 'NO CODE NEEDED'}
                                 </div>
-                                <Button size="lg" className="flex-1" onClick={() => window.open('https://viator.com', '_blank')}>
+                                <Button size="lg" className="flex-1" onClick={() => {
+                                    const fallbackViator = "https://www.viator.com/?pid=P00275081&mcid=42383&medium=link&medium_version=selector&campaign=new-1";
+                                    const isViator = coupon.store?.name?.toLowerCase().includes('viator') || coupon.title.toLowerCase().includes('viator');
+                                    let url = coupon.store?.websiteUrl;
+                                    
+                                    if (!url || url === '#') {
+                                        url = isViator ? fallbackViator : '#';
+                                    }
+
+                                    if (url !== '#') {
+                                        window.open(url, '_blank');
+                                    }
+                                }}>
                                     Copy & Go
                                 </Button>
                             </div>
