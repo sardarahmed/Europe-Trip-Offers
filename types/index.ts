@@ -80,6 +80,7 @@ export interface Coupon {
     successRate?: number;    // New
     lastVerified?: string;   // New
     terms?: string;          // New
+    type?: 'code' | 'deal';  // New
 }
 
 export interface BlogPost {

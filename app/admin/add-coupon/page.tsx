@@ -25,13 +25,13 @@ export default function AddCouponPage() {
         title: '',
         discount_amount: '',
         expiry_date: '',
-        image_url: '',
         category_id: '',
         store_id: '',
         description: '',
         terms: '',
         is_featured: true,
-        used_count: '' // New
+        used_count: '',
+        type: 'code' // New
     });
 
     useEffect(() => {
@@ -65,23 +65,26 @@ export default function AddCouponPage() {
         setMessage(null);
 
         try {
-            if (!formData.code || !formData.title || !formData.discount_amount) {
-                throw new Error('Please fill in required fields (Code, Title, Discount).');
+            if (!formData.title || !formData.discount_amount) {
+                throw new Error('Please fill in required fields (Title, Discount).');
+            }
+            if (formData.type === 'code' && !formData.code) {
+                throw new Error('Please provide a Coupon Code.');
             }
 
             const payload = {
-                code: formData.code.toUpperCase(),
+                code: formData.type === 'code' ? formData.code.toUpperCase() : null,
                 title: formData.title,
                 discount_amount: formData.discount_amount,
                 expiry_date: formData.expiry_date ? new Date(formData.expiry_date).toISOString() : null,
-                image_url: formData.image_url,
                 category_id: formData.category_id || null,
-                store_id: formData.store_id || null, // New
+                store_id: formData.store_id || null,
                 description: formData.description,
                 terms: formData.terms,
                 is_featured: formData.is_featured,
                 used_count: formData.used_count ? parseInt(formData.used_count) : Math.floor(Math.random() * 500) + 10,
                 success_rate: Math.floor(Math.random() * 10) + 90,
+                type: formData.type
             };
 
             const { error } = await supabase.from('coupons').insert([payload]);
@@ -117,13 +120,31 @@ export default function AddCouponPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium mb-2">Coupon Code *</label>
+                        <label className="block text-sm font-medium mb-2">Offer Type *</label>
+                        <select
+                            name="type"
+                            value={formData.type}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            required
+                        >
+                            <option value="code">Coupon Code (Requires Code to Copy)</option>
+                            <option value="deal">Get Deal / Offer (Direct Link)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {formData.type === 'code' ? 'Coupon Code *' : 'Offer Code (Optional)'}
+                        </label>
                         <Input
                             name="code"
                             value={formData.code}
                             onChange={handleChange}
-                            placeholder="e.g. SUMMER25"
-                            required
+                            placeholder={formData.type === 'code' ? "e.g. SUMMER25" : "e.g. AUTO-APPLIED"}
+                            required={formData.type === 'code'}
                         />
                     </div>
                     <div>
@@ -136,64 +157,6 @@ export default function AddCouponPage() {
                             required
                         />
                     </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-2">Title / Offer *</label>
-                    <Input
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        placeholder="e.g. 20% OFF All Paris Tours"
-                        required
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Expiry Date</label>
-                        <Input
-                            type="date"
-                            name="expiry_date"
-                            value={formData.expiry_date}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Category</label>
-                        <select
-                            name="category_id"
-                            value={formData.category_id}
-                            onChange={handleChange}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <option value="">Select a Category</option>
-                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Store / Brand</label>
-                        <select
-                            name="store_id"
-                            value={formData.store_id}
-                            onChange={handleChange}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                            <option value="">Select a Store (Optional)</option>
-                            {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-2">Image URL (Unsplash)</label>
-                    <Input
-                        name="image_url"
-                        value={formData.image_url}
-                        onChange={handleChange}
-                        placeholder="https://images.unsplash.com/..."
-                    />
                 </div>
 
                 <div>

@@ -46,37 +46,39 @@ export function CouponCard({ coupon }: CouponCardProps) {
     return (
         <>
             <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-visible rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all flex flex-col h-full">
-                {/* Image Section (Small - ~35-40% height) */}
-                <div className="h-40 w-full overflow-hidden relative bg-muted rounded-t-xl shrink-0">
-                    {coupon.imageUrl ? (
-                        <Image
-                            src={coupon.imageUrl}
-                            alt={coupon.title}
-                            fill
-                            sizes="(max-width: 768px) 50vw, 20vw"
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary/40 font-bold">
-                            NO IMAGE
-                        </div>
-                    )}
-                    {/* Discount Badge Overlay */}
-                    <div className="absolute top-2 right-2 inline-flex items-center justify-center rounded-full bg-secondary text-white px-3 py-1 text-xs font-bold shadow-sm z-10">
-                        {coupon.discountAmount}
-                    </div>
-                </div>
+                {/* Top Border Accent (Optional) */}
+                <div className="h-1.5 w-full bg-primary shrink-0 rounded-t-xl" />
 
                 {/* Content Section */}
                 <div className="flex-1 p-4 flex flex-col space-y-3">
 
-                    {/* Trust Signals */}
-                    <div className="flex items-center gap-2 text-[10px] font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md w-fit">
-                        <CheckCircle className="h-3 w-3" />
-                        {getVerifiedText(coupon.lastVerified)}
+                    {/* Header Row: Logo + Discount + Trust */}
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                        {/* Logo Wrapper */}
+                        {coupon.store && coupon.store.logoUrl ? (
+                            <div className="h-12 w-12 rounded-full border border-slate-200 bg-white flex items-center justify-center p-1.5 shrink-0 shadow-sm overflow-hidden">
+                                <img src={coupon.store.logoUrl} alt={coupon.store.name} className="object-contain w-full h-full" />
+                            </div>
+                        ) : (
+                            <div className="h-12 w-12 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center p-1.5 shrink-0 shadow-sm text-xs font-bold text-slate-400">
+                                Logo
+                            </div>
+                        )}
+
+                        <div className="flex flex-col items-end gap-1">
+                            {/* Discount Amount Badge */}
+                            <div className="inline-flex items-center justify-center rounded bg-red-100 text-red-600 px-2 py-0.5 text-sm font-bold border border-red-200">
+                                {coupon.discountAmount}
+                            </div>
+                            {/* Trust Signals */}
+                            <div className="flex items-center gap-1 text-[10px] font-medium text-green-600">
+                                <CheckCircle className="h-3 w-3" />
+                                {getVerifiedText(coupon.lastVerified)}
+                            </div>
+                        </div>
                     </div>
 
-                    <h3 className="font-bold text-xl leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-lg leading-snug group-hover:text-primary transition-colors line-clamp-2 min-h-[44px]">
                         {coupon.title}
                     </h3>
 
@@ -133,35 +135,33 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 <div className="p-3 bg-muted/10 flex items-center justify-between gap-2 mt-auto rounded-b-xl">
                     {/* Store Info */}
                     {coupon.store && (
-                        <div className="flex items-center gap-2 shrink-0">
-                            {/* Use a simple image here or text if no Logo component available in this scope easily, 
-                                but better to just render image if exists */}
-                            {coupon.store.logoUrl ? (
-                                <div className="h-6 w-6 relative bg-white rounded-full border overflow-hidden p-0.5">
-                                    <img src={coupon.store.logoUrl} alt={coupon.store.name} className="object-contain w-full h-full" />
-                                </div>
-                            ) : (
-                                <span className="text-[10px] font-bold text-slate-500">{coupon.store.name}</span>
-                            )}
+                        <div className="flex items-center gap-1.5 shrink-0 text-slate-500 font-medium text-xs">
+                            Store: <span className="font-bold text-slate-700">{coupon.store.name}</span>
                         </div>
                     )}
 
                     {/* Button */}
-                    <div className="flex-1">
+                    <div className="flex-1 max-w-[140px]">
                         <Button
                             onClick={(e) => {
-                                // 1. Open Affiliate Link in New Tab
                                 const targetUrl = coupon.store?.websiteUrl || '#';
-                                if (targetUrl !== '#') {
-                                    window.open(targetUrl, '_blank');
+                                
+                                if (coupon.type === 'deal') {
+                                    // Direct link, NO modal
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (targetUrl !== '#') window.open(targetUrl, '_blank');
+                                } else {
+                                    // Code reveal modal
+                                    if (targetUrl !== '#') window.open(targetUrl, '_blank');
+                                    handleReveal(e);
                                 }
-
-                                // 2. Reveal Code (open modal)
-                                handleReveal(e);
                             }}
-                            className="w-full font-bold text-base h-11 bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                            className={`w-full font-bold text-sm h-10 text-white shadow-md hover:shadow-lg transition-all ${
+                                coupon.type === 'deal' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-blue-600 hover:bg-blue-700'
+                            }`}
                         >
-                            Show Code
+                            {coupon.type === 'deal' ? 'Get Offer' : 'Show Code'}
                         </Button>
                     </div>
                 </div>
