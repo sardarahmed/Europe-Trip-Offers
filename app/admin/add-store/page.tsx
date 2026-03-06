@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Container } from '@/components/Container';
 export default function AddStore() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [stores, setStores] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
@@ -20,6 +21,27 @@ export default function AddStore() {
         is_featured: false,
         rating: '4.5'
     });
+
+    useEffect(() => {
+        async function fetchStores() {
+            const { data } = await supabase.from('stores').select('id, name, logo_url, website_url, description').order('name');
+            if (data) setStores(data);
+        }
+        fetchStores();
+    }, []);
+
+    const handleClone = (storeId: string) => {
+        if (!storeId) return;
+        const selected = stores.find(s => s.id === storeId);
+        if (selected) {
+            setFormData(prev => ({
+                ...prev,
+                logo_url: selected.logo_url || '',
+                website_url: selected.website_url || '',
+                description: selected.description || ''
+            }));
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -58,7 +80,7 @@ export default function AddStore() {
             if (error) throw error;
 
             alert('Store added successfully!');
-            router.push('/stores');
+            router.push(`/stores/${payload.slug}`);
             router.refresh();
         } catch (error: any) {
             alert('Error adding store: ' + error.message);
@@ -74,6 +96,20 @@ export default function AddStore() {
                     <h1 className="text-2xl font-bold mb-6">Add New Store / Brand</h1>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Clone from existing Store (Pre-fill assets)</label>
+                            <select 
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                onChange={(e) => handleClone(e.target.value)}
+                            >
+                                <option value="">Select a brand to clone...</option>
+                                {stores.map(s => (
+                                    <option key={s.id} value={s.id}>{s.name}</option>
+                                ))}
+                            </select>
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Useful for creating specialized promo pages for the same brand</p>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Store Name</label>
