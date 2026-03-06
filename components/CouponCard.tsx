@@ -112,7 +112,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                                 animate={{ height: 'auto', opacity: 1 }}
                                 className="mt-2 space-y-2 overflow-hidden"
                             >
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-slate-600 line-clamp-2 mt-1 whitespace-pre-wrap">
                                     {coupon.description}
                                 </p>
                                 {coupon.terms && (

@@ -27,10 +27,11 @@ export default function AddCouponPage() {
         expiry_date: '',
         image_url: '',
         category_id: '',
-        store_id: '', // New
+        store_id: '',
         description: '',
         terms: '',
-        is_featured: true
+        is_featured: true,
+        used_count: '' // New
     });
 
     useEffect(() => {
@@ -79,8 +80,7 @@ export default function AddCouponPage() {
                 description: formData.description,
                 terms: formData.terms,
                 is_featured: formData.is_featured,
-                // Auto-generate realistic looking stats for new coupons
-                used_count: Math.floor(Math.random() * 500) + 10,
+                used_count: formData.used_count ? parseInt(formData.used_count) : Math.floor(Math.random() * 500) + 10,
                 success_rate: Math.floor(Math.random() * 10) + 90,
             };
 
@@ -218,6 +218,19 @@ export default function AddCouponPage() {
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         placeholder="e.g. Min spend $50. New customers only."
                     />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Used Count (Optional)</label>
+                        <Input
+                            name="used_count"
+                            type="number"
+                            value={formData.used_count}
+                            onChange={handleChange}
+                            placeholder="e.g. 500 (Auto-generated if empty)"
+                        />
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">

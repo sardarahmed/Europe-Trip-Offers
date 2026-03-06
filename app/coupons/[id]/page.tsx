@@ -85,7 +85,7 @@ export default function CouponDetailsPage({ params }: { params: Promise<{ id: st
                     <div className="p-8 md:p-10 flex-1 space-y-6">
                         <div>
                             <h1 className="text-3xl font-bold mb-4">{coupon.title}</h1>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                            <p className="text-muted-foreground text-lg leading-relaxed whitespace-pre-wrap">
                                 {coupon.description}
                             </p>
                         </div>
