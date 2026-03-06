@@ -38,7 +38,7 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                             {/* Header: Logo + Name + Used Badge */}
                             <div className="flex items-start justify-between mb-4 z-10 w-full gap-2">
                                 <div className="flex items-center gap-3 w-full">
-                                    <div className="h-12 w-12 rounded-full bg-yellow-400 flex items-center justify-center p-2 shrink-0 overflow-hidden shadow-inner">
+                                    <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-yellow-400 flex items-center justify-center p-2 shrink-0 overflow-hidden shadow-inner">
                                         <img
                                             src={store.logoUrl}
                                             alt={store.name}
@@ -48,7 +48,7 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                                                 (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                                             }}
                                         />
-                                        <span className="hidden text-[10px] font-bold text-slate-700 capitalize">Img</span>
+                                        <span className="hidden text-[10px] sm:text-xs font-bold text-slate-700 capitalize">Img</span>
                                     </div>
                                     <div className="flex flex-col min-w-0">
                                         <span className="text-sm font-bold text-slate-900 line-clamp-1">

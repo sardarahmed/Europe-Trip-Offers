@@ -29,7 +29,7 @@ export function StorePopup({ store }: StorePopupProps) {
         setIsOpen(false);
         // Clean up URL without triggering a full page reload if possible
         const newUrl = window.location.pathname;
-        window.history.replaceState({}, '', newUrl);
+        router.push(newUrl, { scroll: false });
     };
 
     const handleCopy = () => {
@@ -50,7 +50,7 @@ export function StorePopup({ store }: StorePopupProps) {
                 {/* Close Button */}
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors z-50 p-2 bg-white/50 hover:bg-white rounded-full"
                 >
                     <X className="h-6 w-6" />
                 </button>
