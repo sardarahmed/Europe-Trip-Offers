@@ -47,91 +47,73 @@ export function CouponCard({ coupon }: CouponCardProps) {
         <>
             <Link href={`/coupons/${coupon.id}`} className="group block relative overflow-hidden rounded-xl bg-white text-slate-900 border shadow-sm hover:shadow-xl transition-all flex flex-col sm:flex-row min-h-[160px]">
                 {/* Left Side: Logo & Discount Area */}
-                <div className="relative flex flex-col items-center justify-center p-6 bg-slate-50 border-b sm:border-b-0 sm:border-r border-slate-100 sm:w-1/3 min-w-[180px]">
+                <div className="relative flex flex-col items-center justify-center p-6 bg-slate-50/50 border-b sm:border-b-0 sm:border-r border-slate-100 sm:w-1/3 shrink-0">
                     {coupon.store && coupon.store.logoUrl ? (
-                        <div className="h-24 w-24 rounded-full border border-slate-200 bg-white flex items-center justify-center p-3 shadow-sm overflow-hidden mb-3">
+                        <div className="h-28 w-28 rounded-full border border-slate-200 bg-white flex items-center justify-center p-4 shadow-sm overflow-hidden mb-4 group-hover:scale-105 transition-transform duration-300">
                             <img src={coupon.store.logoUrl} alt={coupon.store.name} className="object-contain w-full h-full" />
                         </div>
                     ) : (
-                        <div className="h-24 w-24 rounded-full border border-slate-200 bg-white flex items-center justify-center p-3 shadow-sm text-sm font-bold text-slate-400 mb-3">
+                        <div className="h-28 w-28 rounded-full border border-slate-200 bg-white flex items-center justify-center p-4 shadow-sm text-sm font-bold text-slate-400 mb-4">
                             Logo
                         </div>
                     )}
                     
                     {/* Discount Amount Badge */}
-                    <div className="inline-flex items-center justify-center rounded bg-red-100 text-red-600 px-3 py-1 text-base font-bold border border-red-200 shadow-sm mt-auto">
+                    <div className="inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 px-4 py-1.5 text-lg font-extrabold border border-red-100 shadow-sm mt-auto text-center w-full">
                         {coupon.discountAmount}
                     </div>
                 </div>
 
                 {/* Right Side: Content Area */}
-                <div className="flex-1 p-5 flex flex-col">
-                    <div className="flex justify-between items-start gap-4 mb-2">
+                <div className="flex-1 p-6 flex flex-col">
+                    <div className="flex justify-between items-start gap-4 mb-3">
                         <div className="flex-1">
                             {coupon.store && (
-                                <div className="text-sm font-medium text-slate-500 mb-1">
+                                <div className="text-sm font-semibold text-blue-600 mb-1 tracking-wide uppercase">
                                     {coupon.store.name}
                                 </div>
                             )}
-                            <h3 className="font-bold text-xl leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                            <h3 className="font-bold text-xl md:text-2xl leading-tight group-hover:text-primary transition-colors line-clamp-2">
                                 {coupon.title}
                             </h3>
                         </div>
                         
                         {/* Trust Signal */}
-                        <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-green-600 shrink-0 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                            <CheckCircle className="h-3.5 w-3.5" />
-                            {getVerifiedText(coupon.lastVerified)}
+                        <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
+                             <div className="flex items-center gap-1.5 text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200 shadow-sm">
+                                <CheckCircle className="h-3.5 w-3.5" />
+                                {getVerifiedText(coupon.lastVerified)}
+                            </div>
                         </div>
                     </div>
 
                     {/* Stats */}
-                    <div className="flex items-center gap-4 text-sm text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1.5">
-                            <Users className="h-4 w-4" />
-                            <span>{coupon.usedCount?.toLocaleString() || '100+'} used</span>
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground mb-6 lg:mb-8">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-slate-100 p-1.5 rounded-full"><Users className="h-3.5 w-3.5 text-slate-500" /></div>
+                            <span className="font-medium text-slate-700">{coupon.usedCount?.toLocaleString() || '100+'} used</span>
                         </div>
-                        <div className="flex items-center gap-1.5 text-green-600 font-medium border-l pl-4 border-slate-200">
-                            <Percent className="h-4 w-4" />
-                            <span>{coupon.successRate || 95}% success</span>
+                        <div className="flex items-center gap-2 border-l pl-6 border-slate-200">
+                            <div className="bg-green-50 p-1.5 rounded-full"><Percent className="h-3.5 w-3.5 text-green-600" /></div>
+                            <span className="font-medium text-green-700">{coupon.successRate || 95}% success</span>
                         </div>
                     </div>
 
-                    {/* Description Toggle */}
-                    <div className="mb-4">
+                    {/* Action Row */}
+                    <div className="mt-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-50">
+                        {/* Description Toggle */}
                         <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setShowTerms(!showTerms);
                             }}
-                            className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1"
+                            className="text-sm text-slate-500 font-medium hover:text-slate-800 transition-colors flex items-center gap-1 group/btn"
                         >
                             {showTerms ? 'Hide details' : 'Show details'}
-                            {showTerms ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            {showTerms ? <ChevronUp className="h-4 w-4 group-hover/btn:-translate-y-0.5 transition-transform" /> : <ChevronDown className="h-4 w-4 group-hover/btn:translate-y-0.5 transition-transform" />}
                         </button>
 
-                        {showTerms && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                className="mt-3 space-y-3 overflow-hidden"
-                            >
-                                <p className="text-sm text-slate-600 line-clamp-2 whitespace-pre-wrap">
-                                    {coupon.description}
-                                </p>
-                                {coupon.terms && (
-                                    <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                                        <p className="font-semibold text-slate-700 mb-1">Terms & Conditions:</p>
-                                        {coupon.terms}
-                                    </div>
-                                )}
-                            </motion.div>
-                        )}
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="mt-auto pt-4 flex justify-end">
                         <Button
                             onClick={(e) => {
                                 const fallbackViator = "https://www.viator.com/?pid=P00275081&mcid=42383&medium=link&medium_version=selector&campaign=new-1";
@@ -160,6 +142,24 @@ export function CouponCard({ coupon }: CouponCardProps) {
                             {coupon.type === 'deal' ? 'Get Offer' : 'Show Code'}
                         </Button>
                     </div>
+
+                    {showTerms && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            className="mt-4 space-y-3 overflow-hidden"
+                        >
+                            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+                                {coupon.description}
+                            </p>
+                            {coupon.terms && (
+                                <div className="text-xs text-slate-500 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                    <p className="font-semibold text-slate-700 mb-1">Terms & Conditions:</p>
+                                    {coupon.terms}
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
                 </div>
             </Link>
 
