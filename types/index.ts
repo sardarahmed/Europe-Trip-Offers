@@ -15,6 +15,10 @@ export interface Store {
     isFeatured: boolean; // db column: is_featured
     rating: number;
     reviewCount: number; // db column: review_count
+    customDiscountText?: string; // db column: custom_discount_text
+    usedDealsCount?: number; // db column: used_deals_count
+    popupCode?: string; // db column: popup_code
+    popupLink?: string; // db column: popup_link
 }
 
 export interface City {

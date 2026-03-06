@@ -92,7 +92,12 @@ export default function AdminStoresPage() {
                                                     </span>
                                                 ) : '-'}
                                             </td>
-                                            <td className="px-6 py-4 text-right">
+                                            <td className="px-6 py-4 text-right space-x-2">
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <Link href={`/admin/stores/edit/${store.id}`}>
+                                                        Edit
+                                                    </Link>
+                                                </Button>
                                                 <Button variant="ghost" size="sm" asChild>
                                                     <Link href={`/stores/${store.slug}`} target="_blank">
                                                         <ExternalLink className="h-4 w-4" />

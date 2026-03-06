@@ -1,16 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AdminNav } from '@/components/AdminNav';
 import { Container } from '@/components/Container';
 
-export default function AddStore() {
+export default function EditStore({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
+    const resolvedParams = use(params);
+    const id = resolvedParams.id;
+    
     const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
@@ -25,12 +28,49 @@ export default function AddStore() {
         popup_link: ''
     });
 
+    useEffect(() => {
+        if (id) {
+            fetchStore();
+        }
+    }, [id]);
+
+    const fetchStore = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('stores')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+            if (data) {
+                setFormData({
+                    name: data.name || '',
+                    slug: data.slug || '',
+                    description: data.description || '',
+                    logo_url: data.logo_url || '',
+                    website_url: data.website_url || '',
+                    is_featured: data.is_featured || false,
+                    rating: data.rating ? String(data.rating) : '4.5',
+                    custom_discount_text: data.custom_discount_text || '',
+                    used_deals_count: data.used_deals_count ? String(data.used_deals_count) : '0',
+                    popup_code: data.popup_code || '',
+                    popup_link: data.popup_link || ''
+                });
+            }
+        } catch (error: any) {
+            alert('Error fetching store: ' + error.message);
+        } finally {
+            setFetching(false);
+        }
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
 
-        // Auto-generate slug from name
-        if (name === 'name') {
+        // Auto-generate slug from name if slug is empty
+        if (name === 'name' && !formData.slug) {
             const generatedSlug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
             setFormData(prev => ({ ...prev, slug: generatedSlug }));
         }
@@ -52,34 +92,40 @@ export default function AddStore() {
                 description: formData.description.trim(),
                 logo_url: formData.logo_url.trim(),
                 website_url: formData.website_url.trim(),
-                custom_discount_text: formData.custom_discount_text.trim() || null,
+                custom_discount_text: formData.custom_discount_text?.trim() || null,
                 used_deals_count: parseInt(formData.used_deals_count) || 0,
-                popup_code: formData.popup_code.trim() || null,
-                popup_link: formData.popup_link.trim() || null,
+                popup_code: formData.popup_code?.trim() || null,
+                popup_link: formData.popup_link?.trim() || null,
                 rating: parseFloat(formData.rating)
             };
 
             const { error } = await supabase
                 .from('stores')
-                .insert([payload]);
+                .update(payload)
+                .eq('id', id);
 
             if (error) throw error;
 
-            alert('Store added successfully!');
-            router.push('/stores');
+            alert('Store updated successfully!');
+            router.push('/admin/stores');
             router.refresh();
         } catch (error: any) {
-            alert('Error adding store: ' + error.message);
+            alert('Error updating store: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
+    if (fetching) return <div className="p-10 text-center">Loading...</div>;
+
     return (
         <div className="min-h-screen bg-slate-50">
             <Container className="py-10">
                 <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-100">
-                    <h1 className="text-2xl font-bold mb-6">Add New Store / Brand</h1>
+                    <div className="flex items-center justify-between mb-6">
+                        <h1 className="text-2xl font-bold">Edit Store</h1>
+                        <Button variant="outline" onClick={() => router.push('/admin/stores')}>Cancel</Button>
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
@@ -212,7 +258,7 @@ export default function AddStore() {
                         </div>
 
                         <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? 'Adding...' : 'Add Store'}
+                            {loading ? 'Saving...' : 'Update Store'}
                         </Button>
                     </form>
                 </div>

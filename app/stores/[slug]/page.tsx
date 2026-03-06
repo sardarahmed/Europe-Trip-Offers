@@ -10,6 +10,8 @@ import { StoreLogo } from '@/components/StoreLogo';
 
 export const revalidate = 60;
 
+import { StorePopup } from '@/components/StorePopup';
+
 interface PageProps {
     params: Promise<{ slug: string }>;
 }
@@ -37,7 +39,11 @@ export default async function StoreDetailPage({ params }: PageProps) {
         websiteUrl: storeData.website_url || (storeData.slug.toLowerCase() === 'expedia' ? 'https://expedia.com/affiliate/ePXMSdi' : ''),
         isFeatured: storeData.is_featured,
         rating: storeData.rating,
-        reviewCount: storeData.review_count
+        reviewCount: storeData.review_count,
+        customDiscountText: storeData.custom_discount_text,
+        usedDealsCount: storeData.used_deals_count,
+        popupCode: storeData.popup_code,
+        popupLink: storeData.popup_link
     };
 
     // Auto-fix DB if missing
@@ -97,6 +103,7 @@ export default async function StoreDetailPage({ params }: PageProps) {
 
     return (
         <div className="bg-slate-50 min-h-screen">
+            <StorePopup store={store} />
             {/* Store Header / Hero */}
             <div className="bg-white border-b shadow-sm">
                 <Container>
