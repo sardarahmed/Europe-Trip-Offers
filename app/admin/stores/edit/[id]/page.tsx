@@ -25,7 +25,9 @@ export default function EditStore({ params }: { params: Promise<{ id: string }> 
         custom_discount_text: '',
         used_deals_count: '0',
         popup_code: '',
-        popup_link: ''
+        popup_link: '',
+        offer_title: '',
+        offer_expiry: ''
     });
 
     useEffect(() => {
@@ -55,7 +57,9 @@ export default function EditStore({ params }: { params: Promise<{ id: string }> 
                     custom_discount_text: data.custom_discount_text || '',
                     used_deals_count: data.used_deals_count ? String(data.used_deals_count) : '0',
                     popup_code: data.popup_code || '',
-                    popup_link: data.popup_link || ''
+                    popup_link: data.popup_link || '',
+                    offer_title: data.offer_title || '',
+                    offer_expiry: data.offer_expiry || ''
                 });
             }
         } catch (error: any) {
@@ -96,6 +100,8 @@ export default function EditStore({ params }: { params: Promise<{ id: string }> 
                 used_deals_count: parseInt(formData.used_deals_count) || 0,
                 popup_code: formData.popup_code?.trim() || null,
                 popup_link: formData.popup_link?.trim() || null,
+                offer_title: formData.offer_title?.trim() || null,
+                offer_expiry: formData.offer_expiry?.trim() || null,
                 rating: parseFloat(formData.rating)
             };
 
@@ -227,6 +233,27 @@ export default function EditStore({ params }: { params: Promise<{ id: string }> 
                                     name="popup_link"
                                     placeholder="https://..."
                                     value={formData.popup_link}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Card Offer Title (Optional)</label>
+                                <Input
+                                    name="offer_title"
+                                    placeholder="e.g. 15% Off on Flights & Hotels"
+                                    value={formData.offer_title}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Card Offer Expiry (Optional)</label>
+                                <Input
+                                    name="offer_expiry"
+                                    type="date"
+                                    value={formData.offer_expiry}
                                     onChange={handleChange}
                                 />
                             </div>

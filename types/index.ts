@@ -19,6 +19,8 @@ export interface Store {
     usedDealsCount?: number; // db column: used_deals_count
     popupCode?: string; // db column: popup_code
     popupLink?: string; // db column: popup_link
+    offerTitle?: string; // db column: offer_title
+    offerExpiry?: string; // db column: offer_expiry
 }
 
 export interface City {

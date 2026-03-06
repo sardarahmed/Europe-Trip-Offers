@@ -26,48 +26,79 @@ export function FeaturedBrands({ stores }: FeaturedBrandsProps) {
                     {stores.map((store, index) => (
                         <div
                             key={store.id}
-                            className="group flex flex-col p-5 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 relative"
+                            className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 relative flex flex-col p-5"
                         >
-                            {/* Decorative background accent on hover */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-blue-50/0 to-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                            {/* Top Right Orange Pill */}
+                            {store.customDiscountText && (
+                                <div className="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm z-20">
+                                    {store.customDiscountText}
+                                </div>
+                            )}
 
-                            <div className="w-full h-20 relative flex items-center justify-center mb-3 z-10">
-                                <img
-                                    src={store.logoUrl}
-                                    alt={store.name}
-                                    className="object-contain max-w-full max-h-full drop-shadow-sm group-hover:drop-shadow-md transition-all duration-300 transform group-hover:scale-105"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                                    }}
-                                />
-                                <span className="hidden text-xs font-bold text-slate-300 absolute">LOGO</span>
-                            </div>
+                            {/* Header: Logo + Name + Used Badge */}
+                            <div className="flex items-start justify-between mb-4 z-10 w-full gap-2">
+                                <div className="flex items-center gap-3 w-full">
+                                    <div className="h-12 w-12 rounded-full bg-yellow-400 flex items-center justify-center p-2 shrink-0 overflow-hidden shadow-inner">
+                                        <img
+                                            src={store.logoUrl}
+                                            alt={store.name}
+                                            className="object-contain w-full h-full"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                            }}
+                                        />
+                                        <span className="hidden text-[10px] font-bold text-slate-700 capitalize">Img</span>
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-sm font-bold text-slate-900 line-clamp-1">
+                                            {store.name}
+                                        </span>
+                                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                                            <span className="text-[10px] font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md leading-none">
+                                                Deal
+                                            </span>
+                                            {store.offerExpiry && (
+                                                <span className="text-[10px] text-slate-400 font-medium">
+                                                    Expires: {store.offerExpiry}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div className="z-10 flex flex-col items-center gap-1 w-full flex-grow">
-                                <span className="text-sm font-bold text-slate-900 line-clamp-1 w-full text-center">
-                                    {store.name}
-                                </span>
-                                
-                                {store.customDiscountText && (
-                                    <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full mt-1">
-                                        {store.customDiscountText}
-                                    </span>
-                                )}
-
+                                {/* Used Count Badge */}
                                 {store.usedDealsCount ? (
-                                    <span className="text-[11px] text-slate-500 mt-1">
-                                        {store.usedDealsCount.toLocaleString()} deals used
-                                    </span>
+                                    <div className="shrink-0">
+                                        <span className="inline-flex items-center text-[10px] sm:text-xs font-semibold text-green-700 bg-green-50 border border-green-100 px-2 py-1 rounded-md whitespace-nowrap">
+                                            🔥 {store.usedDealsCount.toLocaleString()} Used
+                                        </span>
+                                    </div>
                                 ) : null}
                             </div>
+
+                            {/* Offer Details */}
+                            <div className="flex-grow z-10 w-full">
+                                <h3 className="font-bold text-slate-900 text-base leading-tight">
+                                    {store.offerTitle || `Best Deals at ${store.name}`}
+                                </h3>
+                                <div className="mt-2">
+                                    <Link
+                                        href={`/stores/${store.slug}`}
+                                        className="text-blue-600 text-xs font-semibold hover:underline flex items-center"
+                                    >
+                                        <span className="mr-1 text-[10px]">▶</span> See Details
+                                    </Link>
+                                </div>
+                            </div>
                             
-                            <div className="mt-4 pt-3 border-t border-slate-100 w-full z-10">
+                            {/* Full Width Get Deal Button */}
+                            <div className="mt-4 pt-3 w-full z-10">
                                 <Link
                                     href={`/stores/${store.slug}?showPopup=true`}
-                                    className="block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 py-2 rounded-lg transition-colors shadow-sm"
+                                    className="block w-full text-center text-sm font-bold text-white bg-[#FF6347] hover:bg-red-500 py-3 rounded-lg transition-colors shadow-sm tracking-wide"
                                 >
-                                    Get Deal
+                                    GET DEAL
                                 </Link>
                             </div>
                         </div>
