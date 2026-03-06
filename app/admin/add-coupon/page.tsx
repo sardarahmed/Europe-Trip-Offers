@@ -160,6 +160,54 @@ export default function AddCouponPage() {
                 </div>
 
                 <div>
+                    <label className="block text-sm font-medium mb-2">Title / Offer *</label>
+                    <Input
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="e.g. 20% OFF All Paris Tours"
+                        required
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Expiry Date</label>
+                        <Input
+                            type="date"
+                            name="expiry_date"
+                            value={formData.expiry_date}
+                            onChange={handleChange}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Category</label>
+                        <select
+                            name="category_id"
+                            value={formData.category_id}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <option value="">Select a Category</option>
+                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Store / Brand</label>
+                        <select
+                            name="store_id"
+                            value={formData.store_id}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                            <option value="">Select a Store (Optional)</option>
+                            {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                <div>
                     <label className="block text-sm font-medium mb-2">Description</label>
                     <textarea
                         name="description"
