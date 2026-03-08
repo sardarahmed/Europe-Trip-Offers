@@ -120,12 +120,15 @@ export function CouponCard({ coupon }: CouponCardProps) {
 
                         <Button
                             onClick={(e) => {
-                                const fallbackViator = "https://www.viator.com/?pid=P00275081&mcid=42383&medium=link&medium_version=selector&campaign=new-1";
+                                const fallbackViator = "https://vi.me/EWss4";
                                 const isViator = coupon.store?.name?.toLowerCase().includes('viator') || coupon.title.toLowerCase().includes('viator');
-                                let targetUrl = coupon.store?.websiteUrl;
+                                let targetUrl = coupon.affiliateLink || coupon.store?.websiteUrl;
 
                                 if (!targetUrl || targetUrl === '#') {
                                     targetUrl = isViator ? fallbackViator : '#';
+                                } else if (isViator && !coupon.affiliateLink && !targetUrl.includes('vi.me')) {
+                                    // Specifically if it's viator and we only have store link but no direct affiliate link
+                                    targetUrl = fallbackViator;
                                 }
                                 
                                 if (coupon.type === 'deal') {

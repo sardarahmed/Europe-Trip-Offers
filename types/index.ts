@@ -81,6 +81,7 @@ export interface Coupon {
     lastVerified?: string;   // New
     terms?: string;          // New
     type?: 'code' | 'deal';  // New
+    affiliateLink?: string;  // New
 }
 
 export interface BlogPost {

@@ -31,7 +31,8 @@ export default function AddCouponPage() {
         terms: '',
         is_featured: true,
         used_count: '',
-        type: 'code' // New
+        type: 'code', // New
+        affiliate_link: '' // New
     });
 
     useEffect(() => {
@@ -84,7 +85,8 @@ export default function AddCouponPage() {
                 is_featured: formData.is_featured,
                 used_count: formData.used_count ? parseInt(formData.used_count) : Math.floor(Math.random() * 500) + 10,
                 success_rate: Math.floor(Math.random() * 10) + 90,
-                type: formData.type
+                type: formData.type,
+                affiliate_link: formData.affiliate_link
             };
 
             const { error } = await supabase.from('coupons').insert([payload]);
@@ -157,6 +159,16 @@ export default function AddCouponPage() {
                             required
                         />
                     </div>
+                </div>
+                
+                <div>
+                    <label className="block text-sm font-medium mb-2">Affiliate / Direct Link (Optional)</label>
+                    <Input
+                        name="affiliate_link"
+                        value={formData.affiliate_link}
+                        onChange={handleChange}
+                        placeholder="e.g. https://vi.me/..."
+                    />
                 </div>
 
                 <div>
