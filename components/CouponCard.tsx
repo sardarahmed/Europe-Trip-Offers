@@ -70,11 +70,18 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 {/* Content Area */}
                 <div className="flex-1 p-5 flex flex-col">
                     <div className="mb-4">
-                        {coupon.store && (
-                            <div className="text-[11px] font-bold text-blue-600 mb-1 tracking-widest uppercase opacity-80">
-                                {coupon.store.name}
-                            </div>
-                        )}
+                        <div className="flex items-center justify-between mb-1">
+                            {coupon.store && (
+                                <div className="text-[11px] font-bold text-blue-600 tracking-widest uppercase opacity-80">
+                                    {coupon.store.name}
+                                </div>
+                            )}
+                            {coupon.category && (
+                                <div className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                                    {coupon.category.name}
+                                </div>
+                            )}
+                        </div>
                         <h3 className={`font-extrabold leading-tight text-slate-800 group-hover:text-blue-600 transition-colors ${
                             coupon.title.length > 60 ? 'text-base' : 
                             coupon.title.length > 40 ? 'text-lg' : 

@@ -19,7 +19,7 @@ export default async function Home() {
     supabase.from('cities').select('*, activities(count)').eq('featured', true).limit(8),
 
     // 3. Featured Coupons
-    supabase.from('coupons').select('*, stores(*)').eq('is_featured', true).limit(12),
+    supabase.from('coupons').select('*, stores(*), categories(*)').eq('is_featured', true).limit(12),
 
     // 4. Featured Activities (Deals)
     supabase.from('activities').select('*, cities(name), stores(*)').eq('is_featured', true).limit(12),
@@ -93,6 +93,12 @@ export default async function Home() {
       isFeatured: c.stores.is_featured,
       rating: c.stores.rating,
       reviewCount: c.stores.review_count
+    } : undefined,
+    category: c.categories ? {
+      id: c.categories.id,
+      name: c.categories.name,
+      slug: c.categories.slug,
+      type: c.categories.type
     } : undefined
   })).sort((a, b) => a.store?.slug === 'viator' ? -1 : b.store?.slug === 'viator' ? 1 : 0);
 

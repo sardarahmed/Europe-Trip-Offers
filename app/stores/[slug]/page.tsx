@@ -55,7 +55,7 @@ export default async function StoreDetailPage({ params }: PageProps) {
     // 2. Fetch Linked Coupons
     const { data: couponsData } = await supabase
         .from('coupons')
-        .select('*')
+        .select('*, categories(*)')
         .eq('store_id', store.id)
         .order('is_featured', { ascending: false });
 
@@ -73,7 +73,13 @@ export default async function StoreDetailPage({ params }: PageProps) {
         usedCount: c.used_count,
         successRate: c.success_rate,
         lastVerified: c.last_verified,
-        terms: c.terms
+        terms: c.terms,
+        category: c.categories ? {
+            id: c.categories.id,
+            name: c.categories.name,
+            slug: c.categories.slug,
+            type: c.categories.type
+        } : undefined
     }));
 
     // 3. Fetch Linked Activities (Deals)
