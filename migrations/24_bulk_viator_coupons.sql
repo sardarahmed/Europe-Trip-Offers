@@ -12,20 +12,23 @@ BEGIN
     END IF;
 END $$;
 
--- 2. Add New Categories
+-- 2. Add New Categories (Safe Insert)
 INSERT INTO categories (name, slug, type)
-VALUES 
+SELECT name, slug, type
+FROM (VALUES 
     ('Hotel & Stays', 'hotel-stays', 'coupon'),
     ('Museum Offers', 'museum-offers', 'coupon'),
     ('Palaces & Historic Places', 'palaces-historic-places', 'coupon'),
     ('Famous Tourist Spots', 'famous-tourist-spots', 'coupon'),
     ('Food & Restaurant Offers', 'food-restaurant-offers', 'coupon'),
     ('Mixed Paris Deals', 'mixed-paris-deals', 'coupon')
-ON CONFLICT (name) DO NOTHING;
+) AS v(name, slug, type)
+WHERE NOT EXISTS (
+    SELECT 1 FROM categories c WHERE c.name = v.name AND c.type = v.type
+);
 
--- 3. Add Coupons for Viator
--- Note: Replace VIATOR_ID with the actual ID if needed, but since we are in SQL we can just use the name join if we wanted.
--- However, I'll use the ID: c8107980-f88b-406e-980d-f988bf91697d
+-- 3. Add Coupons for Viator (Safe Insert)
+-- Viator ID: c8107980-f88b-406e-980d-f988bf91697d
 
 INSERT INTO coupons (title, discount_amount, category_id, store_id, affiliate_link, type, description, is_featured, used_count, success_rate)
 SELECT 
@@ -58,4 +61,6 @@ FROM (VALUES
     ('Paris City Pass Offer – Enjoy special savings on museums, monuments, and guided tours.', 'City Pass Deal', 'Mixed Paris Deals')
 ) AS t(title, discount, category_name)
 JOIN categories c ON c.name = t.category_name AND c.type = 'coupon'
-ON CONFLICT (title) DO NOTHING;
+WHERE NOT EXISTS (
+    SELECT 1 FROM coupons co WHERE co.title = t.title
+);
