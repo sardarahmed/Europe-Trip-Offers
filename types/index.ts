@@ -75,6 +75,8 @@ export interface Coupon {
     store?: Store;    // New
     categoryId?: string;
     category?: Category; // New
+    cityId?: string;     // New
+    city?: City;         // New
     imageUrl?: string;
     isFeatured: boolean;
     usedCount?: number;      // New

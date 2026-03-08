@@ -15,14 +15,16 @@ export default function CouponsPage() {
     const [loading, setLoading] = useState(true);
     const [sort, setSort] = useState('Recommended');
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
+    const [selectedCity, setSelectedCity] = useState<string>('All');
     const [categories, setCategories] = useState<string[]>([]);
+    const [cities, setCities] = useState<string[]>([]);
 
     useEffect(() => {
         async function fetchCoupons() {
             try {
                 const { data, error } = await supabase
                     .from('coupons')
-                    .select('*, created_at, stores(*), categories(*)')
+                    .select('*, created_at, stores(*), categories(*), cities(*)')
                     .order('is_featured', { ascending: false });
 
                 if (data && !error) {
@@ -57,6 +59,16 @@ export default function CouponsPage() {
                             name: c.categories.name,
                             slug: c.categories.slug,
                             type: c.categories.type
+                        } : undefined,
+                        cityId: c.city_id,
+                        city: c.cities ? {
+                            id: c.cities.id,
+                            name: c.cities.name,
+                            slug: c.cities.slug,
+                            country: c.cities.country,
+                            imageUrl: c.cities.image_url,
+                            activityCount: c.cities.activity_count,
+                            featured: c.cities.featured
                         } : undefined
                     }));
                     setCoupons(mapped);
@@ -64,6 +76,10 @@ export default function CouponsPage() {
                     // Extract unique category names
                     const cats = ['All', ...new Set(mapped.map(c => c.category?.name).filter(Boolean) as string[])];
                     setCategories(cats);
+
+                    // Extract unique city names from joined cities
+                    const cityNames = ['All', ...new Set(data.map((c: any) => c.cities?.name).filter(Boolean) as string[])];
+                    setCities(cityNames);
                 }
             } catch (err) {
                 console.error('Error fetching coupons:', err);
@@ -78,7 +94,8 @@ export default function CouponsPage() {
         const matchesSearch = coupon.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             coupon.description.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = selectedCategory === 'All' || coupon.category?.name === selectedCategory;
-        return matchesSearch && matchesCategory;
+        const matchesCity = selectedCity === 'All' || coupon.city?.name === selectedCity;
+        return matchesSearch && matchesCategory && matchesCity;
     });
 
     const sortedCoupons = [...filteredCoupons].sort((a, b) => {
@@ -119,6 +136,19 @@ export default function CouponsPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">City:</span>
+                            <select
+                                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                value={selectedCity}
+                                onChange={(e) => setSelectedCity(e.target.value)}
+                            >
+                                {cities.map(city => (
+                                    <option key={city} value={city}>{city}</option>
+                                ))}
+                            </select>
+                        </div>
+
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Category:</span>
                             <select

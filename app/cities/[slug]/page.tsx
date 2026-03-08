@@ -1,7 +1,8 @@
 import { Container } from '@/components/Container';
 import { DealCard } from '@/components/DealCard';
+import { CouponCard } from '@/components/CouponCard';
 import { Button } from '@/components/ui/button';
-import { Activity, City } from '@/types';
+import { Activity, City, Coupon } from '@/types';
 import { MapPin, Calendar, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
@@ -90,7 +91,6 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
         .select('*, cities(name)')
         .eq('city_id', city.id)
         .order('is_featured', { ascending: false }); // Show featured first
-
     const activities: Activity[] = (activitiesData || []).map((a: any) => ({
         id: a.id,
         title: a.title,
@@ -108,6 +108,43 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
         highlights: a.highlights,
         affiliateLink: a.affiliate_link,
         description: a.description
+    }));
+
+    // 3. Fetch Coupons for this city
+    const { data: couponsData } = await supabase
+        .from('coupons')
+        .select('*, stores(*), categories(*)')
+        .eq('city_id', city.id)
+        .order('is_featured', { ascending: false });
+
+    const coupons: Coupon[] = (couponsData || []).map((c: any) => ({
+        id: c.id,
+        code: c.code,
+        title: c.title,
+        description: c.description || '',
+        discountAmount: c.discount_amount,
+        expiryDate: c.expiry_date,
+        imageUrl: c.image_url,
+        isFeatured: c.is_featured,
+        categoryId: c.category_id,
+        storeId: c.store_id,
+        store: c.stores ? {
+            id: c.stores.id,
+            name: c.stores.name,
+            slug: c.stores.slug,
+            logoUrl: c.stores.logo_url,
+            description: c.stores.description,
+            websiteUrl: c.stores.website_url,
+            isFeatured: c.stores.is_featured,
+            rating: c.stores.rating,
+            reviewCount: c.stores.review_count
+        } : undefined,
+        category: c.categories ? {
+            id: c.categories.id,
+            name: c.categories.name,
+            slug: c.categories.slug,
+            type: c.categories.type
+        } : undefined
     }));
 
     return (
@@ -157,6 +194,21 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                             </Button>
                         </div>
                     </section>
+
+                    {/* City Coupons */}
+                    {coupons.length > 0 && (
+                        <section>
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="h-8 w-1 bg-red-600 rounded-full"></div>
+                                <h2 className="text-2xl font-bold">Exclusive {city.name} Coupons</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {coupons.map((coupon) => (
+                                    <CouponCard key={coupon.id} coupon={coupon} />
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     {/* Travel Guide / Info - Static or could be dynamic in future */}
                     <section className="prose dark:prose-invert max-w-none">
