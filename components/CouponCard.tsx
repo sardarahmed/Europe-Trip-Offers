@@ -73,7 +73,11 @@ export function CouponCard({ coupon }: CouponCardProps) {
                                     {coupon.store.name}
                                 </div>
                             )}
-                            <h3 className="font-bold text-xl md:text-2xl leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                            <h3 className={`font-bold leading-tight group-hover:text-primary transition-colors ${
+                                coupon.title.length > 60 ? 'text-lg' : 
+                                coupon.title.length > 40 ? 'text-xl' : 
+                                'text-2xl'
+                            }`}>
                                 {coupon.title}
                             </h3>
                         </div>
