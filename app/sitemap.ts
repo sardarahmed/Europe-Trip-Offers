@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const { data: cities } = await supabase.from('cities').select('slug, created_at');
     const { data: activities } = await supabase.from('activities').select('slug, created_at');
     const { data: posts } = await supabase.from('posts').select('slug, published_at');
+    const { data: stores } = await supabase.from('stores').select('slug');
 
     const sitemap: MetadataRoute.Sitemap = [
         {
@@ -69,6 +70,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: new Date(post.published_at || new Date()),
             changeFrequency: 'monthly',
             priority: 0.6,
+        });
+    });
+
+    // 5. Add Stores
+    stores?.forEach((store) => {
+        sitemap.push({
+            url: `${BASE_URL}/stores/${store.slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.7,
         });
     });
 

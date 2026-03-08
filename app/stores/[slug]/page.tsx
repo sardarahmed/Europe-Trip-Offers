@@ -12,9 +12,33 @@ export const revalidate = 60;
 
 import { StorePopup } from '@/components/StorePopup';
 
+import { Metadata } from 'next';
+
 interface PageProps {
     params: Promise<{ slug: string }>;
 }
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { slug } = await params;
+    const { data: store } = await supabase
+        .from('stores')
+        .select('name, description')
+        .eq('slug', slug)
+        .single();
+
+    if (!store) return { title: 'Store Not Found' };
+
+    return {
+        title: `${store.name} Coupons & Promo Codes`,
+        description: store.description || `Find the latest ${store.name} promo codes, coupons, and travel deals. Save more on your next trip with verified offers.`,
+        openGraph: {
+            title: `${store.name} Coupons & Promo Codes`,
+            description: store.description,
+        }
+    };
+}
+
+import { JsonLd } from '@/components/JsonLd';
 
 export default async function StoreDetailPage({ params }: PageProps) {
     const { slug } = await params;
@@ -43,6 +67,34 @@ export default async function StoreDetailPage({ params }: PageProps) {
         customDiscountText: storeData.custom_discount_text,
         usedDealsCount: storeData.used_deals_count,
         popupLink: storeData.popup_link
+    };
+
+    const organizationLd = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": store.name,
+        "url": `https://europetripoffers.com/stores/${store.slug}`,
+        "logo": store.logoUrl,
+        "description": store.description
+    };
+
+    const breadcrumbLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://europetripoffers.com"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": store.name,
+                "item": `https://europetripoffers.com/stores/${store.slug}`
+            }
+        ]
     };
 
     // Auto-fix DB if missing
@@ -108,6 +160,8 @@ export default async function StoreDetailPage({ params }: PageProps) {
 
     return (
         <div className="bg-slate-50 min-h-screen">
+            <JsonLd data={organizationLd} />
+            <JsonLd data={breadcrumbLd} />
             <StorePopup store={store} />
             {/* Store Header / Hero */}
             <div className="bg-white border-b shadow-sm">

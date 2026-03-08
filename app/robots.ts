@@ -1,7 +1,5 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://europetripoffers.com'; // Change to real domain
-
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
@@ -9,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/admin/', '/api/'],
         },
-        sitemap: `${BASE_URL}/sitemap.xml`,
+        sitemap: 'https://europetripoffers.com/sitemap.xml',
     };
 }

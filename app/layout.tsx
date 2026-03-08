@@ -12,10 +12,41 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "Europe Trip Offers | Best Travel Deals & Coupons",
+  metadataBase: new URL("https://europetripoffers.com"),
+  title: {
+    default: "Europe Trip Offers | Best Travel Deals & Coupons",
+    template: "%s | Europe Trip Offers"
+  },
   description: "Discover exclusive deals on Europe tours, hotels, and attractions. Save up to 50% with verified coupons.",
+  keywords: ["Europe Travel", "Travel Coupons", "Paris Tours", "Viator Discount", "Travel Deals"],
+  authors: [{ name: "Europe Trip Offers Team" }],
+  openGraph: {
+    title: "Europe Trip Offers | Best Travel Deals & Coupons",
+    description: "Discover exclusive deals on Europe tours, hotels, and attractions. Save up to 50% with verified coupons.",
+    url: "https://europetripoffers.com",
+    siteName: "Europe Trip Offers",
+    images: [
+      {
+        url: "/og-image.jpg", // Suggested to place an image here later
+        width: 1200,
+        height: 630,
+        alt: "Europe Trip Offers",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Europe Trip Offers | Best Travel Deals & Coupons",
+    description: "Discover exclusive deals on Europe tours, hotels, and attractions. Save up to 50% with verified coupons.",
+    images: ["/og-image.jpg"],
+  },
   verification: {
     google: "NKEBxn6sdtDuwhxUOMdJyxJ4z6qcORqsxRqFDqzhoGI",
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 

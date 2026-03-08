@@ -40,6 +40,30 @@ const formatDescription = (text: string) => {
     });
 };
 
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const { data: activity } = await supabase
+        .from('activities')
+        .select('title, description')
+        .eq('slug', slug)
+        .single();
+
+    if (!activity) return { title: 'Offer Not Found' };
+
+    return {
+        title: activity.title,
+        description: activity.description?.substring(0, 160) || `Check out this amazing travel deal: ${activity.title}. Book now and save!`,
+        openGraph: {
+            title: activity.title,
+            description: activity.description?.substring(0, 160),
+        }
+    };
+}
+
+import { JsonLd } from '@/components/JsonLd';
+
 export default async function OfferPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
@@ -73,9 +97,55 @@ export default async function OfferPage({ params }: { params: Promise<{ slug: st
         description: activityData.description
     };
 
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": activity.title,
+        "description": activity.description,
+        "image": activity.imageUrl,
+        "offers": {
+            "@type": "Offer",
+            "price": activity.discountPrice || activity.price,
+            "priceCurrency": "EUR",
+            "availability": "https://schema.org/InStock",
+            "url": `https://europetripoffers.com/offers/${activity.slug}`
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": activity.rating,
+            "reviewCount": activity.reviewsCount
+        }
+    };
+
+    const breadcrumbLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://europetripoffers.com"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Offers",
+                "item": "https://europetripoffers.com/offers"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": activity.title,
+                "item": `https://europetripoffers.com/offers/${activity.slug}`
+            }
+        ]
+    };
 
     return (
         <div className="pb-20">
+            <JsonLd data={jsonLd} />
+            <JsonLd data={breadcrumbLd} />
             <Container className="pt-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 

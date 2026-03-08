@@ -8,6 +8,30 @@ import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
 
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const { data: city } = await supabase
+        .from('cities')
+        .select('name, description')
+        .eq('slug', slug)
+        .single();
+
+    if (!city) return { title: 'City Not Found' };
+
+    return {
+        title: `Best Things to Do in ${city.name}`,
+        description: city.description || `Explore the best attractions, tours, and travel deals in ${city.name}. Plan your perfect European trip today.`,
+        openGraph: {
+            title: `Best Things to Do in ${city.name}`,
+            description: city.description,
+        }
+    };
+}
+
+import { JsonLd } from '@/components/JsonLd';
+
 export default async function CityPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
@@ -33,6 +57,31 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
         imageUrl: cityData.image_url,
         activityCount: cityData.activity_count,
         featured: cityData.featured,
+    };
+
+    const breadcrumbLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://europetripoffers.com"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Cities",
+                "item": "https://europetripoffers.com/cities"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": city.name,
+                "item": `https://europetripoffers.com/cities/${city.slug}`
+            }
+        ]
     };
 
     // 2. Fetch Activities for this city
@@ -63,6 +112,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
 
     return (
         <div className="pb-20">
+            <JsonLd data={breadcrumbLd} />
             {/* City Hero */}
             <div
                 className="relative h-[500px] flex items-end"
